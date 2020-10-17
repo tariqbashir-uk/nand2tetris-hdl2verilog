@@ -1,0 +1,626 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    COMMENT1
+    COMMENT2
+
+Grammar
+
+Rule 0     S' -> test
+Rule 1     test -> statement_list
+Rule 2     test -> empty
+Rule 3     empty -> <empty>
+Rule 4     statement_list -> statement_list statement
+Rule 5     statement_list -> statement
+Rule 6     statement -> set_sequence
+Rule 7     statement -> output_statement
+Rule 8     statement -> load_statement
+Rule 9     statement -> compare_statement
+Rule 10    load_statement -> load NAME DOT NAME COMMA
+Rule 11    compare_statement -> compare DASH to NAME DOT NAME COMMA
+Rule 12    eval_statement -> eval COMMA
+Rule 13    set_sequence -> set_list eval_statement output SEMICOLON
+Rule 14    set_statement -> set NAME NUMBER COMMA
+Rule 15    set_statement -> set NAME PERCENT NAME COMMA
+Rule 16    set_list -> set_list set_statement
+Rule 17    set_list -> set_statement
+Rule 18    output_statement -> output_file
+Rule 19    output_statement -> output_list
+Rule 20    output_file -> output DASH file NAME DOT NAME COMMA
+Rule 21    output_list -> output DASH list output_param_list SEMICOLON
+Rule 22    output_param_list -> output_param_list output_param
+Rule 23    output_param_list -> output_param
+Rule 24    output_param -> NAME PERCENT NAME DOT NUMBER DOT NUMBER
+
+Terminals, with rules where they appear
+
+COMMA                : 10 11 12 14 15 20
+COMMENT1             : 
+COMMENT2             : 
+DASH                 : 11 20 21
+DOT                  : 10 11 20 24 24
+NAME                 : 10 10 11 11 14 15 15 20 20 24 24
+NUMBER               : 14 24 24
+PERCENT              : 15 24
+SEMICOLON            : 13 21
+compare              : 11
+error                : 
+eval                 : 12
+file                 : 20
+list                 : 21
+load                 : 10
+output               : 13 20 21
+set                  : 14 15
+to                   : 11
+
+Nonterminals, with rules where they appear
+
+compare_statement    : 9
+empty                : 2
+eval_statement       : 13
+load_statement       : 8
+output_file          : 18
+output_list          : 19
+output_param         : 22 23
+output_param_list    : 21 22
+output_statement     : 7
+set_list             : 13 16
+set_sequence         : 6
+set_statement        : 16 17
+statement            : 4 5
+statement_list       : 1 4
+test                 : 0
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . test
+    (1) test -> . statement_list
+    (2) test -> . empty
+    (4) statement_list -> . statement_list statement
+    (5) statement_list -> . statement
+    (3) empty -> .
+    (6) statement -> . set_sequence
+    (7) statement -> . output_statement
+    (8) statement -> . load_statement
+    (9) statement -> . compare_statement
+    (13) set_sequence -> . set_list eval_statement output SEMICOLON
+    (18) output_statement -> . output_file
+    (19) output_statement -> . output_list
+    (10) load_statement -> . load NAME DOT NAME COMMA
+    (11) compare_statement -> . compare DASH to NAME DOT NAME COMMA
+    (16) set_list -> . set_list set_statement
+    (17) set_list -> . set_statement
+    (20) output_file -> . output DASH file NAME DOT NAME COMMA
+    (21) output_list -> . output DASH list output_param_list SEMICOLON
+    (14) set_statement -> . set NAME NUMBER COMMA
+    (15) set_statement -> . set NAME PERCENT NAME COMMA
+
+    $end            reduce using rule 3 (empty -> .)
+    load            shift and go to state 13
+    compare         shift and go to state 14
+    output          shift and go to state 10
+    set             shift and go to state 16
+
+    test                           shift and go to state 1
+    statement_list                 shift and go to state 2
+    empty                          shift and go to state 3
+    statement                      shift and go to state 4
+    set_sequence                   shift and go to state 5
+    output_statement               shift and go to state 6
+    load_statement                 shift and go to state 7
+    compare_statement              shift and go to state 8
+    set_list                       shift and go to state 9
+    output_file                    shift and go to state 11
+    output_list                    shift and go to state 12
+    set_statement                  shift and go to state 15
+
+state 1
+
+    (0) S' -> test .
+
+
+
+state 2
+
+    (1) test -> statement_list .
+    (4) statement_list -> statement_list . statement
+    (6) statement -> . set_sequence
+    (7) statement -> . output_statement
+    (8) statement -> . load_statement
+    (9) statement -> . compare_statement
+    (13) set_sequence -> . set_list eval_statement output SEMICOLON
+    (18) output_statement -> . output_file
+    (19) output_statement -> . output_list
+    (10) load_statement -> . load NAME DOT NAME COMMA
+    (11) compare_statement -> . compare DASH to NAME DOT NAME COMMA
+    (16) set_list -> . set_list set_statement
+    (17) set_list -> . set_statement
+    (20) output_file -> . output DASH file NAME DOT NAME COMMA
+    (21) output_list -> . output DASH list output_param_list SEMICOLON
+    (14) set_statement -> . set NAME NUMBER COMMA
+    (15) set_statement -> . set NAME PERCENT NAME COMMA
+
+    $end            reduce using rule 1 (test -> statement_list .)
+    load            shift and go to state 13
+    compare         shift and go to state 14
+    output          shift and go to state 10
+    set             shift and go to state 16
+
+    statement                      shift and go to state 17
+    set_sequence                   shift and go to state 5
+    output_statement               shift and go to state 6
+    load_statement                 shift and go to state 7
+    compare_statement              shift and go to state 8
+    set_list                       shift and go to state 9
+    output_file                    shift and go to state 11
+    output_list                    shift and go to state 12
+    set_statement                  shift and go to state 15
+
+state 3
+
+    (2) test -> empty .
+
+    $end            reduce using rule 2 (test -> empty .)
+
+
+state 4
+
+    (5) statement_list -> statement .
+
+    load            reduce using rule 5 (statement_list -> statement .)
+    compare         reduce using rule 5 (statement_list -> statement .)
+    output          reduce using rule 5 (statement_list -> statement .)
+    set             reduce using rule 5 (statement_list -> statement .)
+    $end            reduce using rule 5 (statement_list -> statement .)
+
+
+state 5
+
+    (6) statement -> set_sequence .
+
+    load            reduce using rule 6 (statement -> set_sequence .)
+    compare         reduce using rule 6 (statement -> set_sequence .)
+    output          reduce using rule 6 (statement -> set_sequence .)
+    set             reduce using rule 6 (statement -> set_sequence .)
+    $end            reduce using rule 6 (statement -> set_sequence .)
+
+
+state 6
+
+    (7) statement -> output_statement .
+
+    load            reduce using rule 7 (statement -> output_statement .)
+    compare         reduce using rule 7 (statement -> output_statement .)
+    output          reduce using rule 7 (statement -> output_statement .)
+    set             reduce using rule 7 (statement -> output_statement .)
+    $end            reduce using rule 7 (statement -> output_statement .)
+
+
+state 7
+
+    (8) statement -> load_statement .
+
+    load            reduce using rule 8 (statement -> load_statement .)
+    compare         reduce using rule 8 (statement -> load_statement .)
+    output          reduce using rule 8 (statement -> load_statement .)
+    set             reduce using rule 8 (statement -> load_statement .)
+    $end            reduce using rule 8 (statement -> load_statement .)
+
+
+state 8
+
+    (9) statement -> compare_statement .
+
+    load            reduce using rule 9 (statement -> compare_statement .)
+    compare         reduce using rule 9 (statement -> compare_statement .)
+    output          reduce using rule 9 (statement -> compare_statement .)
+    set             reduce using rule 9 (statement -> compare_statement .)
+    $end            reduce using rule 9 (statement -> compare_statement .)
+
+
+state 9
+
+    (13) set_sequence -> set_list . eval_statement output SEMICOLON
+    (16) set_list -> set_list . set_statement
+    (12) eval_statement -> . eval COMMA
+    (14) set_statement -> . set NAME NUMBER COMMA
+    (15) set_statement -> . set NAME PERCENT NAME COMMA
+
+    eval            shift and go to state 20
+    set             shift and go to state 16
+
+    eval_statement                 shift and go to state 18
+    set_statement                  shift and go to state 19
+
+state 10
+
+    (20) output_file -> output . DASH file NAME DOT NAME COMMA
+    (21) output_list -> output . DASH list output_param_list SEMICOLON
+
+    DASH            shift and go to state 21
+
+
+state 11
+
+    (18) output_statement -> output_file .
+
+    load            reduce using rule 18 (output_statement -> output_file .)
+    compare         reduce using rule 18 (output_statement -> output_file .)
+    output          reduce using rule 18 (output_statement -> output_file .)
+    set             reduce using rule 18 (output_statement -> output_file .)
+    $end            reduce using rule 18 (output_statement -> output_file .)
+
+
+state 12
+
+    (19) output_statement -> output_list .
+
+    load            reduce using rule 19 (output_statement -> output_list .)
+    compare         reduce using rule 19 (output_statement -> output_list .)
+    output          reduce using rule 19 (output_statement -> output_list .)
+    set             reduce using rule 19 (output_statement -> output_list .)
+    $end            reduce using rule 19 (output_statement -> output_list .)
+
+
+state 13
+
+    (10) load_statement -> load . NAME DOT NAME COMMA
+
+    NAME            shift and go to state 22
+
+
+state 14
+
+    (11) compare_statement -> compare . DASH to NAME DOT NAME COMMA
+
+    DASH            shift and go to state 23
+
+
+state 15
+
+    (17) set_list -> set_statement .
+
+    eval            reduce using rule 17 (set_list -> set_statement .)
+    set             reduce using rule 17 (set_list -> set_statement .)
+
+
+state 16
+
+    (14) set_statement -> set . NAME NUMBER COMMA
+    (15) set_statement -> set . NAME PERCENT NAME COMMA
+
+    NAME            shift and go to state 24
+
+
+state 17
+
+    (4) statement_list -> statement_list statement .
+
+    load            reduce using rule 4 (statement_list -> statement_list statement .)
+    compare         reduce using rule 4 (statement_list -> statement_list statement .)
+    output          reduce using rule 4 (statement_list -> statement_list statement .)
+    set             reduce using rule 4 (statement_list -> statement_list statement .)
+    $end            reduce using rule 4 (statement_list -> statement_list statement .)
+
+
+state 18
+
+    (13) set_sequence -> set_list eval_statement . output SEMICOLON
+
+    output          shift and go to state 25
+
+
+state 19
+
+    (16) set_list -> set_list set_statement .
+
+    eval            reduce using rule 16 (set_list -> set_list set_statement .)
+    set             reduce using rule 16 (set_list -> set_list set_statement .)
+
+
+state 20
+
+    (12) eval_statement -> eval . COMMA
+
+    COMMA           shift and go to state 26
+
+
+state 21
+
+    (20) output_file -> output DASH . file NAME DOT NAME COMMA
+    (21) output_list -> output DASH . list output_param_list SEMICOLON
+
+    file            shift and go to state 27
+    list            shift and go to state 28
+
+
+state 22
+
+    (10) load_statement -> load NAME . DOT NAME COMMA
+
+    DOT             shift and go to state 29
+
+
+state 23
+
+    (11) compare_statement -> compare DASH . to NAME DOT NAME COMMA
+
+    to              shift and go to state 30
+
+
+state 24
+
+    (14) set_statement -> set NAME . NUMBER COMMA
+    (15) set_statement -> set NAME . PERCENT NAME COMMA
+
+    NUMBER          shift and go to state 31
+    PERCENT         shift and go to state 32
+
+
+state 25
+
+    (13) set_sequence -> set_list eval_statement output . SEMICOLON
+
+    SEMICOLON       shift and go to state 33
+
+
+state 26
+
+    (12) eval_statement -> eval COMMA .
+
+    output          reduce using rule 12 (eval_statement -> eval COMMA .)
+
+
+state 27
+
+    (20) output_file -> output DASH file . NAME DOT NAME COMMA
+
+    NAME            shift and go to state 34
+
+
+state 28
+
+    (21) output_list -> output DASH list . output_param_list SEMICOLON
+    (22) output_param_list -> . output_param_list output_param
+    (23) output_param_list -> . output_param
+    (24) output_param -> . NAME PERCENT NAME DOT NUMBER DOT NUMBER
+
+    NAME            shift and go to state 37
+
+    output_param_list              shift and go to state 35
+    output_param                   shift and go to state 36
+
+state 29
+
+    (10) load_statement -> load NAME DOT . NAME COMMA
+
+    NAME            shift and go to state 38
+
+
+state 30
+
+    (11) compare_statement -> compare DASH to . NAME DOT NAME COMMA
+
+    NAME            shift and go to state 39
+
+
+state 31
+
+    (14) set_statement -> set NAME NUMBER . COMMA
+
+    COMMA           shift and go to state 40
+
+
+state 32
+
+    (15) set_statement -> set NAME PERCENT . NAME COMMA
+
+    NAME            shift and go to state 41
+
+
+state 33
+
+    (13) set_sequence -> set_list eval_statement output SEMICOLON .
+
+    load            reduce using rule 13 (set_sequence -> set_list eval_statement output SEMICOLON .)
+    compare         reduce using rule 13 (set_sequence -> set_list eval_statement output SEMICOLON .)
+    output          reduce using rule 13 (set_sequence -> set_list eval_statement output SEMICOLON .)
+    set             reduce using rule 13 (set_sequence -> set_list eval_statement output SEMICOLON .)
+    $end            reduce using rule 13 (set_sequence -> set_list eval_statement output SEMICOLON .)
+
+
+state 34
+
+    (20) output_file -> output DASH file NAME . DOT NAME COMMA
+
+    DOT             shift and go to state 42
+
+
+state 35
+
+    (21) output_list -> output DASH list output_param_list . SEMICOLON
+    (22) output_param_list -> output_param_list . output_param
+    (24) output_param -> . NAME PERCENT NAME DOT NUMBER DOT NUMBER
+
+    SEMICOLON       shift and go to state 43
+    NAME            shift and go to state 37
+
+    output_param                   shift and go to state 44
+
+state 36
+
+    (23) output_param_list -> output_param .
+
+    SEMICOLON       reduce using rule 23 (output_param_list -> output_param .)
+    NAME            reduce using rule 23 (output_param_list -> output_param .)
+
+
+state 37
+
+    (24) output_param -> NAME . PERCENT NAME DOT NUMBER DOT NUMBER
+
+    PERCENT         shift and go to state 45
+
+
+state 38
+
+    (10) load_statement -> load NAME DOT NAME . COMMA
+
+    COMMA           shift and go to state 46
+
+
+state 39
+
+    (11) compare_statement -> compare DASH to NAME . DOT NAME COMMA
+
+    DOT             shift and go to state 47
+
+
+state 40
+
+    (14) set_statement -> set NAME NUMBER COMMA .
+
+    eval            reduce using rule 14 (set_statement -> set NAME NUMBER COMMA .)
+    set             reduce using rule 14 (set_statement -> set NAME NUMBER COMMA .)
+
+
+state 41
+
+    (15) set_statement -> set NAME PERCENT NAME . COMMA
+
+    COMMA           shift and go to state 48
+
+
+state 42
+
+    (20) output_file -> output DASH file NAME DOT . NAME COMMA
+
+    NAME            shift and go to state 49
+
+
+state 43
+
+    (21) output_list -> output DASH list output_param_list SEMICOLON .
+
+    load            reduce using rule 21 (output_list -> output DASH list output_param_list SEMICOLON .)
+    compare         reduce using rule 21 (output_list -> output DASH list output_param_list SEMICOLON .)
+    output          reduce using rule 21 (output_list -> output DASH list output_param_list SEMICOLON .)
+    set             reduce using rule 21 (output_list -> output DASH list output_param_list SEMICOLON .)
+    $end            reduce using rule 21 (output_list -> output DASH list output_param_list SEMICOLON .)
+
+
+state 44
+
+    (22) output_param_list -> output_param_list output_param .
+
+    SEMICOLON       reduce using rule 22 (output_param_list -> output_param_list output_param .)
+    NAME            reduce using rule 22 (output_param_list -> output_param_list output_param .)
+
+
+state 45
+
+    (24) output_param -> NAME PERCENT . NAME DOT NUMBER DOT NUMBER
+
+    NAME            shift and go to state 50
+
+
+state 46
+
+    (10) load_statement -> load NAME DOT NAME COMMA .
+
+    load            reduce using rule 10 (load_statement -> load NAME DOT NAME COMMA .)
+    compare         reduce using rule 10 (load_statement -> load NAME DOT NAME COMMA .)
+    output          reduce using rule 10 (load_statement -> load NAME DOT NAME COMMA .)
+    set             reduce using rule 10 (load_statement -> load NAME DOT NAME COMMA .)
+    $end            reduce using rule 10 (load_statement -> load NAME DOT NAME COMMA .)
+
+
+state 47
+
+    (11) compare_statement -> compare DASH to NAME DOT . NAME COMMA
+
+    NAME            shift and go to state 51
+
+
+state 48
+
+    (15) set_statement -> set NAME PERCENT NAME COMMA .
+
+    eval            reduce using rule 15 (set_statement -> set NAME PERCENT NAME COMMA .)
+    set             reduce using rule 15 (set_statement -> set NAME PERCENT NAME COMMA .)
+
+
+state 49
+
+    (20) output_file -> output DASH file NAME DOT NAME . COMMA
+
+    COMMA           shift and go to state 52
+
+
+state 50
+
+    (24) output_param -> NAME PERCENT NAME . DOT NUMBER DOT NUMBER
+
+    DOT             shift and go to state 53
+
+
+state 51
+
+    (11) compare_statement -> compare DASH to NAME DOT NAME . COMMA
+
+    COMMA           shift and go to state 54
+
+
+state 52
+
+    (20) output_file -> output DASH file NAME DOT NAME COMMA .
+
+    load            reduce using rule 20 (output_file -> output DASH file NAME DOT NAME COMMA .)
+    compare         reduce using rule 20 (output_file -> output DASH file NAME DOT NAME COMMA .)
+    output          reduce using rule 20 (output_file -> output DASH file NAME DOT NAME COMMA .)
+    set             reduce using rule 20 (output_file -> output DASH file NAME DOT NAME COMMA .)
+    $end            reduce using rule 20 (output_file -> output DASH file NAME DOT NAME COMMA .)
+
+
+state 53
+
+    (24) output_param -> NAME PERCENT NAME DOT . NUMBER DOT NUMBER
+
+    NUMBER          shift and go to state 55
+
+
+state 54
+
+    (11) compare_statement -> compare DASH to NAME DOT NAME COMMA .
+
+    load            reduce using rule 11 (compare_statement -> compare DASH to NAME DOT NAME COMMA .)
+    compare         reduce using rule 11 (compare_statement -> compare DASH to NAME DOT NAME COMMA .)
+    output          reduce using rule 11 (compare_statement -> compare DASH to NAME DOT NAME COMMA .)
+    set             reduce using rule 11 (compare_statement -> compare DASH to NAME DOT NAME COMMA .)
+    $end            reduce using rule 11 (compare_statement -> compare DASH to NAME DOT NAME COMMA .)
+
+
+state 55
+
+    (24) output_param -> NAME PERCENT NAME DOT NUMBER . DOT NUMBER
+
+    DOT             shift and go to state 56
+
+
+state 56
+
+    (24) output_param -> NAME PERCENT NAME DOT NUMBER DOT . NUMBER
+
+    NUMBER          shift and go to state 57
+
+
+state 57
+
+    (24) output_param -> NAME PERCENT NAME DOT NUMBER DOT NUMBER .
+
+    SEMICOLON       reduce using rule 24 (output_param -> NAME PERCENT NAME DOT NUMBER DOT NUMBER .)
+    NAME            reduce using rule 24 (output_param -> NAME PERCENT NAME DOT NUMBER DOT NUMBER .)
+
