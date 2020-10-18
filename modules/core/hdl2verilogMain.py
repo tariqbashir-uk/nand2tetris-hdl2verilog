@@ -6,6 +6,7 @@ from modules.core.logger import Logger
 from modules.core.textFile import TextFile
 
 from modules.fileHandlers.hdlFile import HdlFile
+from modules.hdlTypes.hdlChipList import HdlChipList
 from modules.hdlTypes.hdlChip import HdlChip
 from modules.hdlTypes.hdlChipPart import HdlChipPart
 from modules.hdlTypes.hdlConnection import HdlConnection
@@ -36,13 +37,17 @@ class Hdl2verilogMain():
     def Run(self, inputFolder, outputFolder):
         hdlFilenames = self._GetFilesWithExtInFolder(inputFolder, 'hdl')
 
-        hdlChips = []
+        hdlChipList = HdlChipList()
         for hdlFilename in hdlFilenames:
             self.logger.Info("Reading %s .." % (hdlFilename))
             hdlFile = HdlFile(join(inputFolder, hdlFilename))
             hdlChip = hdlFile.ParseFile()
-            hdlChips.append(hdlChip)
-            self.CreateVerilogModule(hdlChip, outputFolder)
+            hdlChipList.AddChip(hdlChip)
+
+        hdlChipList.UpdateAllPin1BitWidths()
+
+        for hdlChip in hdlChipList.chipList:  
+            self.CreateVerilogModule(hdlChip, hdlChipList, outputFolder)
 
         tstFilenames = self._GetFilesWithExtInFolder(inputFolder, 'tst')
         
@@ -54,11 +59,9 @@ class Hdl2verilogMain():
             tstScript = tstFile.ParseFile()
             tstScripts.append(tstScript)
 
-            for hdlChip in hdlChips:
-                if hdlChip.chipName == tstScript.testHdlModule:
-                    tstScript.testChip = hdlChip            
-                    self.CreateVerilogModuleTB(tstScript, outputFolder)
-                    tstsToRun.append(tstScript)
+            tstScript.testChip = hdlChipList.GetChip(tstScript.testHdlModule)            
+            self.CreateVerilogModuleTB(tstScript, outputFolder)
+            tstsToRun.append(tstScript)
 
             #print(hdlChip.GetChipDependencyList())
 
@@ -66,7 +69,8 @@ class Hdl2verilogMain():
         runContents = "set -e\n"
 
         for tstToRun in tstsToRun: # Type: TstScript
-            moduleList = self._GetVerilogDependencyFileList(tstToRun, hdlChips)
+            moduleList = hdlChipList.GetChipDependencyList(tstToRun.testChip)
+            moduleList = [x + ".v" for x in moduleList]
 
             runContents += ("echo \"Building and running test for %s\"\n" % (tstToRun.testHdlModule))
             runContents += ("iverilog -o ./out/%s %s %s\n" % (tstToRun.testHdlModule, tstToRun.testHdlModule + "_tb.v", " ".join([x for x in moduleList])))
@@ -79,27 +83,6 @@ class Hdl2verilogMain():
 
         self.WriteNandV(outputFolder)
         return    
-
-    ##########################################################################
-    def _GetVerilogDependencyFileList(self, tstToRun : TstScript, hdlChips):
-        # Get the direct dependencies of the chip being tested
-        moduleList = tstToRun.testChip.GetChipDependencyList()
-
-        indirectModules = ['Nand']
-        # Get the indirect dependencies
-        for module in moduleList: #type: list[string]
-            for hdlChip in hdlChips:  #type: HdlChip
-                if module == hdlChip.chipName:
-                    indirectModules.extend(hdlChip.GetChipDependencyList())
-
-        for indirectModule in indirectModules:
-            if indirectModule not in moduleList:
-                moduleList.append(indirectModule)
-
-        moduleList.append(tstToRun.testHdlModule)
-        moduleList = [x + ".v" for x in moduleList]
-
-        return moduleList
 
     ##########################################################################
     def WriteNandV(self, outputFolder):
@@ -150,7 +133,7 @@ class Hdl2verilogMain():
         return
 
     ##########################################################################
-    def CreateVerilogModule(self, hdlChip : HdlChip, outputFolder):
+    def CreateVerilogModule(self, hdlChip : HdlChip, hdlChipList : HdlChipList, outputFolder):
         verilogModGen = VerilogModuleGenerator(outputFolder)
 
         partList = hdlChip.GetChipPartList() #type: list[HdlChipPart]
@@ -187,13 +170,22 @@ class Hdl2verilogMain():
 
             pinDict = {}
             for connection in connections:
-                pin1, pin2        = connection.GetPins()
+                pin1, pin2 = connection.GetPins() # type: HdlPin, HdlPin
+              
+                # For internal pins we need to know their width and we can get this from the pin width of the chip that is being called
+                if pin1.IsOutput() and pin2.IsInternal() and pin2.bitWidth == None:
+                    bitWidth = hdlChipList.GetBitWidthForPin(part.partName, pin1.pinName)
+                    hdlChip.UpdatePin2Width(pin2.pinName, bitWidth)
+
                 bitStart, bitEnd  = pin2.GetPinBitRange()
                 internalParamPort = VerilogPort(pin2.pinName, VerilogPortDirectionTypes.unknown, "", bitStart, bitEnd, pin2.IsInternal())
                 
                 keyName = pin1.pinName + ":" + pin2.pinName
                 if keyName not in pinDict:
-                    pinDict[keyName] = VerilogSubmoduleCallParam(pin1.pinName, internalParamPort)
+                    pinDict[keyName] = VerilogSubmoduleCallParam(pin1.pinName, 
+                                                                 internalParamPort, 
+                                                                 pin1.IsOutput(),
+                                                                 True if pin1.bitWidth == pin2.bitWidth else False)
                     verilogSubmoduleCall.AddCallParam(pinDict[keyName])
                 else:
                     # Handling case where input bits are made from concatinated internal variable bits

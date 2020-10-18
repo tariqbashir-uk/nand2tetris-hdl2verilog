@@ -6,16 +6,6 @@ from modules.hdlTypes.hdlPin import HdlPin
 
 from ply import lex, yacc
 
-    # private void initKeywords() {
-    #     this.keywords = new Hashtable();
-    #     this.keywords.put("CHIP", new Integer(1));
-    #     this.keywords.put("IN", new Integer(2));
-    #     this.keywords.put("OUT", new Integer(3));
-    #     this.keywords.put("BUILTIN", new Integer(4));
-    #     this.keywords.put("CLOCKED", new Integer(5));
-    #     this.keywords.put("PARTS:", new Integer(6));
-    # }
-
 class HdlParser:
     reserved = [
         'CHIP', 'IN', 'OUT', 'PARTS', 'BUILTIN', 'CLOCKED'
@@ -159,8 +149,7 @@ class HdlParser:
         if len(p) > 2:
             pinBitWidth = p[2]
 
-        pin = HdlPin(pinName, bitWidth=pinBitWidth)
-        p[0] = pin
+        p[0] = HdlPin(pinName, bitWidth=pinBitWidth)
         return
 
     def p_pinlist(self, p):

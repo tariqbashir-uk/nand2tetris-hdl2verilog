@@ -2,7 +2,7 @@ from modules.hdlTypes.hdlPin import HdlPin
 from modules.hdlTypes.hdlPinTypes import HdlPinTypes
 
 class HdlConnection():
-    def __init__(self, pin1, pin2):
+    def __init__(self, pin1 : HdlPin, pin2 : HdlPin):
         self.pin1 = pin1
         self.pin2 = pin2
         return

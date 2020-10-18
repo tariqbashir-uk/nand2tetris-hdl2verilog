@@ -1,11 +1,17 @@
 from modules.verilogTypes.verilogPort import VerilogPort
 
 class VerilogSubmoduleCallParam():
-    def __init__(self, portName, internalParamPort : VerilogPort):
+    def __init__(self, portName, internalParamPort : VerilogPort, isCallPortOutput, isModuleAndParamWidthSame):
         self.portName          = portName
         self.internalParamPort = internalParamPort
         self.bitCount          = 1
+        self.isCallPortOutput  = isCallPortOutput
+        self.isModuleAndParamWidthSame = isModuleAndParamWidthSame
         return
+
+    ##########################################################################
+    def IsCallPortOutput(self):
+        return self.isCallPortOutput
 
     ##########################################################################
     def IncrementBitCount(self):
@@ -18,10 +24,16 @@ class VerilogSubmoduleCallParam():
         paramNameList = [self.internalParamPort for i in range(self.bitCount)]
 
         if self.bitCount == 1:
-            paramName = self.internalParamPort.GetPortStr()
+            if self.isModuleAndParamWidthSame:
+                paramName = self.internalParamPort.portName
+            else:
+                paramName = self.internalParamPort.GetPortStr()
         else:
             paramName += "{" 
-            paramName += ', '.join([x.GetPortStr() for x in paramNameList])
+            if self.isModuleAndParamWidthSame:
+                paramName += ', '.join([x.portName for x in paramNameList])
+            else:
+                paramName += ', '.join([x.GetPortStr() for x in paramNameList])
             paramName += "}" 
 
         return paramName

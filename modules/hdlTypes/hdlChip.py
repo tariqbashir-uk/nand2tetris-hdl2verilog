@@ -2,14 +2,15 @@ from modules.core.logger import Logger
 from modules.hdlTypes.hdlPin import HdlPin
 from modules.hdlTypes.hdlPinTypes import HdlPinTypes
 from modules.hdlTypes.hdlChipPart import HdlChipPart
+from modules.hdlTypes.hdlConnection import HdlConnection
 
 class HdlChip():
     def __init__(self):
         self.logger     = Logger()
         self.chipName   = None
-        self.inputPins  = []
-        self.outputPins = []
-        self.partList   = []
+        self.inputPins  = []  # type: list[HdlPin]
+        self.outputPins = []  # type: list[HdlPin]
+        self.partList   = []  # type: list[HdlChipPart]
         return
 
     ##########################################################################
@@ -39,10 +40,68 @@ class HdlChip():
         return
 
     ##########################################################################
+    def UpdatePin2Width(self, pinName, bitWidth):
+        for part in self.partList:
+            for connection in part.connections: # type: HdlConnection
+                if connection.pin2.pinName == pinName:
+                    connection.pin2.bitWidth = bitWidth   
+        return
+
+    ##########################################################################
+    def UpdatePin1Width(self, pinName, bitWidth):
+        for part in self.partList:
+            for connection in part.connections: # type: HdlConnection
+                if connection.pin1.pinName == pinName:
+                    connection.pin1.bitWidth = bitWidth   
+        return
+
+    ##########################################################################
+    def UpdatePin1Type(self, pinName, pinType):
+        for part in self.partList:
+            for connection in part.connections: # type: HdlConnection
+                if connection.pin1.pinName == pinName:
+                    connection.pin1.pinType = pinType   
+        return
+
+    ##########################################################################
+    def GetPin(self, pinName):
+        pin = None
+ 
+        for inputPin in self.inputPins: 
+            if inputPin.pinName == pinName:
+                pin = inputPin
+                break
+
+        if pin == None:
+            for outputPin in self.outputPins: 
+                if outputPin.pinName == pinName:
+                    pin = outputPin
+                    break
+
+        return pin
+
+    ##########################################################################
+    def GetBitWidthForPin(self, pinName):
+        bitWidth = None
+ 
+        for inputPin in self.inputPins: 
+            if inputPin.pinName == pinName:
+                bitWidth = inputPin.bitWidth
+                break
+
+        if bitWidth == None:
+            for outputPin in self.outputPins: 
+                if outputPin.pinName == pinName:
+                    bitWidth = outputPin.bitWidth
+                    break
+
+        return bitWidth
+
+    ##########################################################################
     def GetChipDependencyList(self):
         dependencyList = []
 
-        for part in self.partList: #type: HdlChipPart
+        for part in self.partList:
             if part.partName not in dependencyList:
                 dependencyList.append(part.partName)
 

@@ -32,10 +32,11 @@ class VerilogModuleGenerator:
 
         internalVarDict = {}
         # Add the internal vairable definitions
-        for submoduleCall in verilogMainModule.GetSubmoduleCalls(): #Type: VerilogSubmoduleCall
+        for submoduleCall in verilogMainModule.GetSubmoduleCalls(): # type: VerilogSubmoduleCall
             callParamStr = []
-            for callParam in submoduleCall.GetCallParams(): #Type: VerilogSubmoduleCallParam
+            for callParam in submoduleCall.GetCallParams(): # type: VerilogSubmoduleCallParam
                 if callParam.internalParamPort.IsInternal():
+                #if callParam.internalParamPort.IsInternal() and callParam.IsCallPortOutput():
                     keyName = callParam.internalParamPort.GetPortStr(isDefinition=True)
                     if keyName not in internalVarDict:
                         internalVarDict[keyName] = 0
@@ -45,9 +46,9 @@ class VerilogModuleGenerator:
 
         verilogText += "// Implementation Code\n"
 
-        for submoduleCall in verilogMainModule.GetSubmoduleCalls(): #Type: VerilogSubmoduleCall
+        for submoduleCall in verilogMainModule.GetSubmoduleCalls(): # type: VerilogSubmoduleCall
             callParamStr = []
-            for callParam in submoduleCall.GetCallParams(): #Type: VerilogSubmoduleCallParam
+            for callParam in submoduleCall.GetCallParams(): # type: VerilogSubmoduleCallParam
                 callParamStr.append(("    .%s (%s)" % (callParam.portName, callParam.GetParamNameForCall())))
 
             verilogText += ("%s %s(\n%s);\n" % (submoduleCall.GetModuleName(), 

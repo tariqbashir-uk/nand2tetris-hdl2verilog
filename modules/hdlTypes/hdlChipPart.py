@@ -1,4 +1,6 @@
+from modules.hdlTypes.hdlPin import HdlPin
 from modules.hdlTypes.hdlPinTypes import HdlPinTypes
+from modules.hdlTypes.hdlConnection import HdlConnection
 
 class HdlChipPart():
     def __init__(self, partName):
@@ -17,16 +19,16 @@ class HdlChipPart():
         
     ##########################################################################
     def SetPinTypes(self, inputPins, outputPins):
-        for connection in self.connections:
+        for connection in self.connections: # type: HdlConnection
             pinFound = False
 
-            for inputPin in inputPins:
+            for inputPin in inputPins: # type: HdlPin
                 if inputPin.pinName == connection.pin2.pinName:
                     connection.pin2.pinType = inputPin.pinType
                     pinFound = True
                     break
 
-            for outputPin in outputPins:
+            for outputPin in outputPins: # type: HdlPin
                 if outputPin.pinName == connection.pin2.pinName:
                     connection.pin2.pinType = outputPin.pinType
                     pinFound = True

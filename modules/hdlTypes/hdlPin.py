@@ -8,6 +8,10 @@ class HdlPin():
         return
 
     ##########################################################################
+    def IsOutput(self):
+        return True if self.pinType == HdlPinTypes.Output else False
+
+    ##########################################################################
     def IsInternal(self):
         return True if self.pinType == HdlPinTypes.Internal else False
 
@@ -17,13 +21,13 @@ class HdlPin():
         bitEnd   = -1
         
         if self.bitWidth:
-            bitWdith = self.bitWidth.replace("[", "").replace("]", "")
-            if ".." in bitWdith:
-                b = bitWdith.split("..")
+            bitWidth = self.bitWidth.replace("[", "").replace("]", "")
+            if ".." in bitWidth:
+                b = bitWidth.split("..")
                 bitStart = int(b[1])
                 bitEnd   = int(b[0])
             else:
-                bitStart = int(bitWdith)
+                bitStart = int(bitWidth)
 
         return bitStart, bitEnd
 
