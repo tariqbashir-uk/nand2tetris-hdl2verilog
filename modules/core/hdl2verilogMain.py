@@ -76,7 +76,7 @@ class Hdl2verilogMain():
             runContents += ("iverilog -o ./out/%s %s %s\n" % (tstToRun.testHdlModule, tstToRun.testHdlModule + "_tb.v", " ".join([x for x in moduleList])))
             # iverilog -o ./out/And And_tb.v Not.v And.v Nand.v
             runContents += ("vvp ./out/%s\n" % (tstToRun.testHdlModule))
-            runContents += ("diff -w ../hdl_input/%s %s\n" % (tstToRun.compareFile, tstToRun.outputFile))
+            runContents += ("diff -w %s/%s %s\n" % (inputFolder, tstToRun.compareFile, tstToRun.outputFile))
             runContents += "\n"
 
         runSHFile.WriteFile(runContents)
