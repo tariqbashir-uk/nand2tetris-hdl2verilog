@@ -66,16 +66,27 @@ class HdlChipList():
         moduleList = hdlChip.GetChipDependencyList()
 
         indirectModules = ['Nand']
-        # Get the indirect dependencies
-        for module in moduleList: #type: list[string]
-            for chip in self.chipList:  #type: HdlChip
-                if module == chip.chipName:
-                    indirectModules.extend(chip.GetChipDependencyList())
+        moduleLength    = len(indirectModules)
+        runLoop         = True
+        inModuleList    = moduleList
+        while runLoop == True:
+            # Get the indirect dependencies
+            for module in inModuleList: #type: list[string]
+                for chip in self.chipList:  #type: HdlChip
+                    if module == chip.chipName:
+                        newDependencies = chip.GetChipDependencyList()
+                        for newDependency in newDependencies:
+                            if newDependency not in indirectModules:
+                                indirectModules.append(newDependency)
+            if moduleLength == len(indirectModules):
+                runLoop = False
+            else:
+                moduleLength = len(indirectModules)
+                inModuleList = indirectModules
 
         for indirectModule in indirectModules:
             if indirectModule not in moduleList:
                 moduleList.append(indirectModule)
 
         moduleList.append(hdlChip.chipName)
-
         return moduleList
