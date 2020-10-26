@@ -120,6 +120,7 @@ class TstParser:
     def p_set_statement(self, p):
         '''set_statement : set NAME NUMBER COMMA
                          | set NAME PERCENT NAME COMMA
+                         | set NAME PERCENT NAME SEMICOLON
                          '''
         pinValue = ""
         pinName  = p[2]
