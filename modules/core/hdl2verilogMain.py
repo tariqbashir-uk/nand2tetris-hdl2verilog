@@ -27,6 +27,8 @@ from modules.verilogTypes.verilogSubmoduleCallParam import VerilogSubmoduleCallP
 from modules.generator.verilogModuleGenerator import VerilogModuleGenerator
 from modules.generator.verilogTestBenchGenerator import VerilogTestBenchGenerator
 
+import modules.settings as settings
+
 class Hdl2verilogMain():
     def __init__(self):
         self.logger      = Logger()
@@ -35,12 +37,21 @@ class Hdl2verilogMain():
 
     ##########################################################################
     def Run(self, inputFolder, outputFolder):
-        hdlFilenames = self._GetFilesWithExtInFolder(inputFolder, 'hdl')
+        hdlStoreFolder = join(outputFolder, settings.HDL_STORE_FOLDER)
+        self.fileActions.CreateFolderIfNeeded(hdlStoreFolder)
 
-        hdlChipList = HdlChipList()
+        hdlFilenames = self._GetFilesWithExtInFolder(inputFolder, 'hdl')
+        for hdlFilename in hdlFilenames:
+            self.logger.Info("Copying %s to store" % (hdlFilename))
+            fullInputFilename = join(inputFolder, hdlFilename)
+            self.fileActions.CopyFile(fullInputFilename, join(hdlStoreFolder, hdlFilename))
+
+        hdlFilenames = self._GetFilesWithExtInFolder(hdlStoreFolder, 'hdl')
+        hdlChipList  = HdlChipList()
         for hdlFilename in hdlFilenames:
             self.logger.Info("Reading %s .." % (hdlFilename))
-            hdlFile = HdlFile(join(inputFolder, hdlFilename))
+            fullInputFilename = join(hdlStoreFolder, hdlFilename)
+            hdlFile = HdlFile(fullInputFilename)
             hdlChip = hdlFile.ParseFile()
             hdlChipList.AddChip(hdlChip)
 
