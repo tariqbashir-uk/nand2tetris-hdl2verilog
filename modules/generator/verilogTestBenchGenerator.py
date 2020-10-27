@@ -17,7 +17,7 @@ class VerilogTestBenchGenerator:
         verilogFile = TextFile(join(self.outputFolder, verilogModuleTB.moduleName + '.v'))
 
         verilogText  = "//`timescale 100 us/10 us // time-unit = 10 ns, precision = 1 ns\n\n"
-        verilogText += ("module %s;\n" % (verilogModuleTB.moduleName))
+        verilogText += ("module %s;\n" % (verilogModuleTB.moduleName.replace("-", "_")))
 
         indent += settings.DEFAULT_INDENT
         paramList = []
@@ -44,7 +44,7 @@ class VerilogTestBenchGenerator:
         verilogText += "\n"
         verilogText += ("%s%s %s(%s);\n" % (" ".rjust(indent), 
                                             verilogModuleTB.testModuleName, 
-                                            verilogModuleTB.moduleName,
+                                            verilogModuleTB.moduleName.replace("-", "_"),
                                             ', '.join([x for x in testModuleParams])))
 
         verilogText += "\n"
@@ -57,7 +57,7 @@ class VerilogTestBenchGenerator:
 
         indent += settings.DEFAULT_INDENT
         verilogText += ("%s$dumpfile(\"%s\");\n" % (" ".rjust(indent), verilogModuleTB.dumpFilename))
-        verilogText += ("%s$dumpvars(0, %s);\n" % (" ".rjust(indent), verilogModuleTB.moduleName))
+        verilogText += ("%s$dumpvars(0, %s);\n" % (" ".rjust(indent), verilogModuleTB.moduleName.replace("-", "_")))
         verilogText += ("%swrite_data = $fopen(\"%s\");\n" % (" ".rjust(indent), verilogModuleTB.outFilename))
         verilogText += "\n"
         verilogText += ("%s$fdisplay(write_data, \"| %s |\");\n" % (" ".rjust(indent), ' | '.join([x for x in paramNameList])))
