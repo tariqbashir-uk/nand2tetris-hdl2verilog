@@ -9,6 +9,6 @@ class TstFile(TextFile):
         return
 
     ##########################################################################
-    def ParseFile(self):
+    def ParseFile(self, testName):
         fileContents = self.ReadFile() 
-        return self.tstParser.Parse(fileContents)
+        return self.tstParser.Parse(fileContents, testName)

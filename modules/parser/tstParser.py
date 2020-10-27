@@ -102,8 +102,12 @@ class TstParser:
         return
 
     def p_compare_statement(self, p):
-        '''compare_statement : compare DASH to NAME DOT NAME COMMA'''
-        self.tstScript.compareFile = ("%s.%s" % (p[4], p[6]))
+        '''compare_statement : compare DASH to NAME DOT NAME COMMA
+                             | compare DASH to NAME DASH NAME DOT NAME COMMA'''
+        if len(p) > 8:
+            self.tstScript.compareFile = ("%s-%s.%s" % (p[4], p[6], p[8]))
+        else:
+            self.tstScript.compareFile = ("%s.%s" % (p[4], p[6]))
         return
 
     def p_eval_statement(self, p):
@@ -154,8 +158,12 @@ class TstParser:
         return
 
     def p_output_file(self, p):
-        '''output_file : output DASH file NAME DOT NAME COMMA'''
-        self.tstScript.outputFile = ("%s.%s" % (p[4], p[6]))
+        '''output_file : output DASH file NAME DOT NAME COMMA
+                       | output DASH file NAME DASH NAME DOT NAME COMMA'''
+        if len(p) > 8:
+            self.tstScript.outputFile = ("%s-%s.%s" % (p[4], p[6], p[8]))
+        else:
+            self.tstScript.outputFile = ("%s.%s" % (p[4], p[6]))
         return
 
     def p_output_list(self, p):
@@ -193,12 +201,13 @@ class TstParser:
         return
 
     ##########################################################################
-    def Parse(self, fileContent):
+    def Parse(self, fileContent, testName):
         self.lexer.input(fileContent)
 
         # for token in self.lexer:
         #     print(token)
 
+        self.tstScript.testName = testName
         self.parser.parse(fileContent)
         self.tstScript.DumpTestDetails()
         return self.tstScript

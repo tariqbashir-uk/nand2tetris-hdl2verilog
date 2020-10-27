@@ -65,9 +65,10 @@ class Hdl2verilogMain():
         tstScripts = []
         tstsToRun  = []
         for tstFilename in tstFilenames:
+            testName, ext = self.fileActions.GetFileNameAndExt(tstFilename)
             self.logger.Info("Reading %s .." % (tstFilename))
             tstFile   = TstFile(join(inputFolder, tstFilename))
-            tstScript = tstFile.ParseFile()
+            tstScript = tstFile.ParseFile(testName)
             tstScripts.append(tstScript)
 
             tstScript.testChip = hdlChipList.GetChip(tstScript.testHdlModule)            
@@ -83,10 +84,10 @@ class Hdl2verilogMain():
             moduleList = hdlChipList.GetChipDependencyList(tstToRun.testChip)
             moduleList = [x + ".v" for x in moduleList]
 
-            runContents += ("echo \"Building and running test for %s\"\n" % (tstToRun.testHdlModule))
-            runContents += ("iverilog -o ./out/%s %s %s\n" % (tstToRun.testHdlModule, tstToRun.testHdlModule + "_tb.v", " ".join([x for x in moduleList])))
+            runContents += ("echo \"Building and running test for %s\"\n" % (tstToRun.testName))
+            runContents += ("iverilog -o ./out/%s %s %s\n" % (tstToRun.testName, tstToRun.testName + "_tb.v", " ".join([x for x in moduleList])))
             # iverilog -o ./out/And And_tb.v Not.v And.v Nand.v
-            runContents += ("vvp ./out/%s\n" % (tstToRun.testHdlModule))
+            runContents += ("vvp ./out/%s\n" % (tstToRun.testName))
             runContents += ("diff -w %s/%s %s\n" % (inputFolder, tstToRun.compareFile, tstToRun.outputFile))
             runContents += "\n"
 
@@ -111,7 +112,7 @@ class Hdl2verilogMain():
         hdlChip       = tstScript.testChip
         verilogModGen = VerilogTestBenchGenerator(outputFolder)
 
-        verilogModuleTB = VerilogModuleTB(tstScript.testHdlModule + "_tb",
+        verilogModuleTB = VerilogModuleTB(tstScript.testName + "_tb",
                                           tstScript.testHdlModule,
                                           tstScript.testHdlModule + ".vcd",
                                           tstScript.outputFile)
