@@ -51,12 +51,14 @@ class HdlParser:
         t.lexer.lineno += len(t.value)
 
     def t_COMMENT1(self, t):
-        r'(/\*(.|\n)*?\*/)'
+        r'(/\*(.|\n)*?\*/\n)'
+        t.lexer.lineno += len(t.value.split("\n")) - 1
         #return t
         pass
 
     def t_COMMENT2(self, t):
         r'(//.*?(\n|$))'
+        t.lexer.lineno += 1
         #return t
         pass
 
@@ -101,7 +103,7 @@ class HdlParser:
 
     def p_part(self, p):
         '''part : NAME OBRACKET partparamlist CBRACKET SEMICOLON'''
-        hdlChipPart = HdlChipPart(p[1])
+        hdlChipPart = HdlChipPart(p[1], p.lineno(1))
         for part in p[3]:
             hdlChipPart.AddConnection(part)
 
@@ -197,6 +199,6 @@ class HdlParser:
         # for token in self.lexer:
         #     print(token)
 
-        self.parser.parse(fileContent)
+        self.parser.parse(fileContent, tracking=True)
         self.hdlChip.DumpChipDetails()
         return self.hdlChip

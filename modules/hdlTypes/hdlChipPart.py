@@ -3,8 +3,9 @@ from modules.hdlTypes.hdlPinTypes import HdlPinTypes
 from modules.hdlTypes.hdlConnection import HdlConnection
 
 class HdlChipPart():
-    def __init__(self, partName):
+    def __init__(self, partName, lineNo):
         self.partName    = partName
+        self.lineNo      = lineNo
         self.connections = []
         return
 

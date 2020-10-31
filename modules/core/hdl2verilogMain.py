@@ -187,12 +187,15 @@ class Hdl2verilogMain():
                 # For internal pins we need to know their width and we can get this from the pin width of the chip that is being called
                 if pin1.IsOutput() and pin2.IsInternal() and pin2.bitWidth == None:
                     bitWidth = hdlChipList.GetBitWidthForPin(part.partName, pin1.pinName)
+                    # Check if we have a split pin output case, we can tell this is pin1.bitwidth is defined and different to the chip bitwidth */ 
+                    if pin1.bitWidth and pin1.bitWidth != bitWidth:
+                        bitWidth = pin1.bitWidth
                     hdlChip.UpdatePin2Width(pin2.pinName, bitWidth)
 
                 bitStart, bitEnd  = pin2.GetPinBitRange()
                 internalParamPort = VerilogPort(pin2.pinName, VerilogPortDirectionTypes.unknown, "", bitStart, bitEnd, pin2.IsInternal())
                 
-                keyName = pin1.pinName + ":" + pin2.pinName
+                keyName = pin1.pinName
                 if keyName not in pinDict:
                     pinDict[keyName] = VerilogSubmoduleCallParam(pin1.pinName, 
                                                                  internalParamPort, 

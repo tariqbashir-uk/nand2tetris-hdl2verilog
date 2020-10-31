@@ -44,15 +44,21 @@ class HdlChip():
         for part in self.partList:
             for connection in part.connections: # type: HdlConnection
                 if connection.pin2.pinName == pinName:
-                    connection.pin2.bitWidth = bitWidth   
+                    if not connection.pin2.bitWidth and bitWidth:
+                        self.logger.Debug("Updating chip %s, line %d, part %s: Pin2 \"%s\" width changed from %s to %s" % 
+                                            (self.chipName, part.lineNo, part.partName, connection.pin2.pinName, connection.pin2.bitWidth, bitWidth))
+                        connection.pin2.bitWidth = bitWidth   
         return
 
     ##########################################################################
-    def UpdatePin1Width(self, pinName, bitWidth):
+    def UpdatePin1Width(self, partName, pinName, bitWidth):
         for part in self.partList:
             for connection in part.connections: # type: HdlConnection
-                if connection.pin1.pinName == pinName:
-                    connection.pin1.bitWidth = bitWidth   
+                if connection.pin1.pinName == pinName and part.partName == partName:
+                    if not connection.pin1.bitWidth and bitWidth:
+                        self.logger.Debug("Updating chip %s, line %d, part %s: Pin1 \"%s\" width changed from %s to %s (from %s)" % 
+                                            (self.chipName, part.lineNo, part.partName, connection.pin1.pinName, connection.pin1.bitWidth, bitWidth, partName))
+                        connection.pin1.bitWidth = bitWidth
         return
 
     ##########################################################################
@@ -94,7 +100,8 @@ class HdlChip():
                 if outputPin.pinName == pinName:
                     bitWidth = outputPin.bitWidth
                     break
-
+        
+        #self.logger.Debug("Chip %s, pin \"%s\" bitwidth = %s" % (self.chipName, pinName, bitWidth))
         return bitWidth
 
     ##########################################################################
@@ -136,6 +143,6 @@ class HdlChip():
 
         self.logger.Debug("Implementation:")
         for part in self.partList:
-            self.logger.Debug("  Part %s: %s" % (part.partName, part.GetConnectionStr()))
+            self.logger.Debug("  Part %s (line %d): %s" % (part.partName, part.lineNo, part.GetConnectionStr()))
         self.logger.Debug("***** END: %s HDL Chip *****" % (self.chipName))
         return    

@@ -35,7 +35,7 @@ class HdlChipList():
                         pin = self.GetPin(part.partName, connection.pin1.pinName) # type: HdlPin
                         if connection.pin1.bitWidth == None:
                             bitWidth = self.GetBitWidthForPin(part.partName, pin.pinName)
-                            hdlChip.UpdatePin1Width(pin.pinName, bitWidth)
+                            hdlChip.UpdatePin1Width(part.partName, pin.pinName, bitWidth)
                         hdlChip.UpdatePin1Type(pin.pinName, pin.pinType)
 
         return
@@ -58,6 +58,7 @@ class HdlChipList():
         if hdlChip: # type: HdlChip
             bitWidth = hdlChip.GetBitWidthForPin(pinName)
 
+        #self.logger.Debug("Chip %s, pin \"%s\" bitwidth = %s" % (chipName, pinName, bitWidth))
         return bitWidth
     
     ##########################################################################

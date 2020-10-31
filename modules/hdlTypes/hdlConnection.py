@@ -13,4 +13,4 @@ class HdlConnection():
 
     ##########################################################################
     def GetPinStr(self):
-        return ("[%s : %s (%s)]" % (self.pin1.pinName, self.pin2.GetPortStr(), self.pin2.pinType)) 
+        return ("[%s : %s (%s)]" % (self.pin1.GetPortStr(), self.pin2.GetPortStr(), self.pin2.pinType)) 
