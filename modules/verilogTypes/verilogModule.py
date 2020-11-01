@@ -13,14 +13,14 @@ class VerilogModule():
 
     ##########################################################################
     def AddInputPorts(self, inputs):
-        self.logger.Debug("AddInputPorts: %d" % (len(inputs)))
+        #self.logger.Debug("AddInputPorts: %d" % (len(inputs)))
         for inputPort in inputs:
             self.inputPorts.append(inputPort)
         return
 
     ##########################################################################
     def AddOutputPorts(self, outputs):
-        self.logger.Debug("AddOutputPorts: %d" % (len(outputs)))
+        #self.logger.Debug("AddOutputPorts: %d" % (len(outputs)))
         for outputPort in outputs:
             self.outputPorts.append(outputPort)
         return

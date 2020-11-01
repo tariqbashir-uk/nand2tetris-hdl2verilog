@@ -80,7 +80,7 @@ class Hdl2verilogMain():
         runSHFile   = TextFile(join(outputFolder, 'runme.sh'))
         runContents = "set -e\n"
 
-        for tstToRun in tstsToRun: # Type: TstScript
+        for tstToRun in tstsToRun: # type: TstScript
             moduleList = hdlChipList.GetChipDependencyList(tstToRun.testChip)
             moduleList = [x + ".v" for x in moduleList]
 
