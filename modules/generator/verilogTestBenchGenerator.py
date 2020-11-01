@@ -21,8 +21,8 @@ class VerilogTestBenchGenerator:
 
         indent += settings.DEFAULT_INDENT
         paramList = []
-        paramList.extend([("%sreg  %s" % (" ".rjust(indent), x.GetPortStr(isDefinition=True))) for x in verilogModuleTB.GetInputPortList()])
-        paramList.extend([("%swire %s" % (" ".rjust(indent), x.GetPortStr(isDefinition=True))) for x in verilogModuleTB.GetOutputPortList()])
+        paramList.extend([("%sreg  %s" % (" ".rjust(indent), x.GetPortStr())) for x in verilogModuleTB.GetInputPortList()])
+        paramList.extend([("%swire %s" % (" ".rjust(indent), x.GetPortStr())) for x in verilogModuleTB.GetOutputPortList()])
 
         if len(paramList) > 0:
             verilogText += (';\n'.join([x for x in paramList]))

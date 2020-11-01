@@ -20,8 +20,8 @@ class VerilogModuleGenerator:
         verilogText += ("module %s(\n" % (verilogMainModule.moduleName))
 
         paramList = []
-        paramList.extend([("    input  " + x.GetPortStr(isDefinition=True)) for x in verilogMainModule.GetInputPortList()])
-        paramList.extend([("    output " + x.GetPortStr(isDefinition=True)) for x in verilogMainModule.GetOutputPortList()])
+        paramList.extend([("    input  " + x.GetPortStr()) for x in verilogMainModule.GetInputPortList()])
+        paramList.extend([("    output " + x.GetPortStr()) for x in verilogMainModule.GetOutputPortList()])
 
         if len(paramList) > 0:
             verilogText += (',\n'.join([x for x in paramList]))
@@ -36,8 +36,7 @@ class VerilogModuleGenerator:
             callParamStr = []
             for callParam in submoduleCall.GetCallParams(): # type: VerilogSubmoduleCallParam
                 if callParam.internalParamPort.IsInternal():
-                #if callParam.internalParamPort.IsInternal() and callParam.IsCallPortOutput():
-                    keyName = callParam.internalParamPort.GetPortStr(isDefinition=True)
+                    keyName = callParam.internalParamPort.GetPortStr()
                     if keyName not in internalVarDict:
                         internalVarDict[keyName] = 0
                         verilogText += ("wire %s;\n" % (keyName))
@@ -49,7 +48,7 @@ class VerilogModuleGenerator:
         for submoduleCall in verilogMainModule.GetSubmoduleCalls(): # type: VerilogSubmoduleCall
             callParamStr = []
             for callParam in submoduleCall.GetCallParams(): # type: VerilogSubmoduleCallParam
-                callParamStr.append(("    .%s (%s)" % (callParam.portName, callParam.GetParamNameForCall())))
+                callParamStr.append(("    .%s (%s)" % (callParam.subModulePort.portName, callParam.GetParamNameForCall())))
 
             verilogText += ("%s %s(\n%s);\n" % (submoduleCall.GetModuleName(), 
                                                 submoduleCall.GetModuleCallName(), 

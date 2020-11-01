@@ -32,10 +32,9 @@ class HdlChipList():
             for part in hdlChip.partList: # type: HdlChipPart
                 for connection in part.connections: # type: HdlConnection
                     if part.partName != 'Nand':
-                        pin = self.GetPin(part.partName, connection.pin1.pinName) # type: HdlPin
-                        if connection.pin1.bitWidth == None:
-                            bitWidth = self.GetBitWidthForPin(part.partName, pin.pinName)
-                            hdlChip.UpdatePin1Width(part.partName, pin.pinName, bitWidth)
+                        pin      = self.GetPin(part.partName, connection.pin1.pinName) # type: HdlPin
+                        bitWidth = self.GetBitWidthForPin(part.partName, pin.pinName)
+                        hdlChip.UpdatePin1Width(part.partName, pin.pinName, bitWidth)
                         hdlChip.UpdatePin1Type(pin.pinName, pin.pinType)
 
         return

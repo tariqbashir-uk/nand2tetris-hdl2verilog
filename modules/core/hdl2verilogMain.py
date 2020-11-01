@@ -119,18 +119,12 @@ class Hdl2verilogMain():
 
         portList = []
         for inputPin in hdlChip.GetInputPinList(): #type: HdlPin
-            bitStart, bitEnd = inputPin.GetPinBitRange()
-            pinName = inputPin.pinName
-
-            portList.append(VerilogPort(pinName, VerilogPortDirectionTypes.input, "", bitStart, bitEnd, inputPin.IsInternal()))
+            portList.append(self._HdlPinToVerilogPort(inputPin))
         verilogModuleTB.AddInputPorts(portList)
 
         portList = []
         for outputPin in hdlChip.GetOutputPinList(): #type: HdlPin
-            bitStart, bitEnd = outputPin.GetPinBitRange()
-            pinName = outputPin.pinName
-
-            portList.append(VerilogPort(pinName, VerilogPortDirectionTypes.output, "", bitStart, bitEnd, outputPin.IsInternal()))
+            portList.append(self._HdlPinToVerilogPort(outputPin))
         verilogModuleTB.AddOutputPorts(portList)
         
         for setSequence in tstScript.setSequences: #type: TstSetSequence
@@ -154,18 +148,12 @@ class Hdl2verilogMain():
 
         portList = []
         for inputPin in hdlChip.GetInputPinList(): #type: HdlPin
-            bitStart, bitEnd = inputPin.GetPinBitRange()
-            pinName = inputPin.pinName
-
-            portList.append(VerilogPort(pinName, VerilogPortDirectionTypes.input, "", bitStart, bitEnd, inputPin.IsInternal()))
+            portList.append(self._HdlPinToVerilogPort(inputPin))
         verilogMainModule.AddInputPorts(portList)
 
         portList = []
         for outputPin in hdlChip.GetOutputPinList(): #type: HdlPin
-            bitStart, bitEnd = outputPin.GetPinBitRange()
-            pinName = outputPin.pinName
-
-            portList.append(VerilogPort(pinName, VerilogPortDirectionTypes.output, "", bitStart, bitEnd, outputPin.IsInternal()))
+            portList.append(self._HdlPinToVerilogPort(outputPin))
         verilogMainModule.AddOutputPorts(portList)
 
         verilogSubmoduleCalls = []
@@ -185,22 +173,23 @@ class Hdl2verilogMain():
                 pin1, pin2 = connection.GetPins() # type: HdlPin, HdlPin
               
                 # For internal pins we need to know their width and we can get this from the pin width of the chip that is being called
-                if pin1.IsOutput() and pin2.IsInternal() and pin2.bitWidth == None:
+                if pin1.IsOutput() and pin2.IsInternal():
                     bitWidth = hdlChipList.GetBitWidthForPin(part.partName, pin1.pinName)
                     # Check if we have a split pin output case, we can tell this is pin1.bitwidth is defined and different to the chip bitwidth */ 
-                    if pin1.bitWidth and pin1.bitWidth != bitWidth:
+                    if pin1.bitWidth != bitWidth:
                         bitWidth = pin1.bitWidth
                     hdlChip.UpdatePin2Width(pin2.pinName, bitWidth)
 
-                bitStart, bitEnd  = pin2.GetPinBitRange()
-                internalParamPort = VerilogPort(pin2.pinName, VerilogPortDirectionTypes.unknown, "", bitStart, bitEnd, pin2.IsInternal())
-                
+                subModulePort     = self._HdlPinToVerilogPort(pin1)
+                internalParamPort = self._HdlPinToVerilogPort(pin2)
+
                 keyName = pin1.pinName
                 if keyName not in pinDict:
-                    pinDict[keyName] = VerilogSubmoduleCallParam(pin1.pinName, 
+                    pinDict[keyName] = VerilogSubmoduleCallParam(subModulePort, 
                                                                  internalParamPort, 
-                                                                 pin1.IsOutput(),
-                                                                 True if pin1.bitWidth == pin2.bitWidth else False)
+                                                                 connection.pin2StartBitOfBus,
+                                                                 connection.pin2EndBitOfBus,
+                                                                 connection.pin2BitIndex)
                     verilogSubmoduleCall.AddCallParam(pinDict[keyName])
                 else:
                     # Handling case where input bits are made from concatinated internal variable bits
@@ -209,10 +198,21 @@ class Hdl2verilogMain():
             verilogSubmoduleCalls.append(verilogSubmoduleCall)
 
         verilogMainModule.AddSubmoduleCalls(verilogSubmoduleCalls)
-        #verilogMainModule.DumpModuleDetails()
+        verilogMainModule.DumpModuleDetails()
         #print(moduleCalls)
         verilogModGen.CreateModule(verilogMainModule)
         return
+
+    ##########################################################################
+    def _HdlPinToVerilogPort(self, hdlPin : HdlPin):
+        portDirection = VerilogPortDirectionTypes.unknown
+
+        if hdlPin.pinType == HdlPinTypes.Input:
+            portDirection = VerilogPortDirectionTypes.input
+        elif hdlPin.pinType == HdlPinTypes.Output:
+            portDirection = VerilogPortDirectionTypes.output
+
+        return VerilogPort(hdlPin.pinName, portDirection, "", hdlPin.GetPinBitWidth(), hdlPin.IsInternal())
 
     ##########################################################################
     def _GetFilesWithExtInFolder(self, folder, ext):
