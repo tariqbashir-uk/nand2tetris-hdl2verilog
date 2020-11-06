@@ -3,7 +3,7 @@
 load Test1.hdl,
 output-file Test1.out,
 compare-to Test1.cmp,
-output-list a%B2.2.2 b%B3.3.3 out%B3.2.3;
+output-list a%B2.2.2 b%B3.3.3 out%B3.3.3;
 
 set a %B00,
 set b %B000,

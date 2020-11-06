@@ -2,25 +2,26 @@
 
 CHIP Test1 {
     IN a[2], b[3];
-    OUT out[2];
+    OUT out[3];
 
     PARTS:
       Nand(a=a[0], b=b[0], out=temp);
+      Nand(a=a[0], b=b[1], out=temp2);
 
       TestNand16(a[0]=temp, a[1]=temp, a[2]=temp, a[3]=temp, a[4]=temp, a[5]=temp, a[6]=temp, a[7]=temp, 
-                 a[8]=temp, a[9]=temp, a[10]=temp, a[11]=temp, a[12]=temp, a[13]=temp, a[14]=temp, a[15]=temp,
+                 a[8]=temp2, a[9]=temp2, a[10]=temp2, a[11]=temp2, a[12]=temp2, a[13]=temp2, a[14]=temp2, a[15]=temp2,
                  b[0]=temp, b[1]=temp, b[2]=temp, b[3]=temp, b[4]=temp, b[5]=temp, b[6]=temp, b[7]=temp, 
-                 b[8]=temp, b[9]=temp, b[10]=temp, b[11]=temp, b[12]=temp, b[13]=temp, b[14]=temp, b[15]=temp,             
+                 b[8]=temp2, b[9]=temp2, b[10]=temp2, b[11]=temp2, b[12]=temp2, b[13]=temp2, b[14]=temp2, b[15]=temp2,             
                  out[0..7]=Nand16ResultL8,
                  out[8..15]=Nand16ResultH8);
 
       Nand(a=a[0], b=b[1], out=out[0]);
 
-      TestNand2(a=b[0..1], b=b[1..2], out=temp2);
+      TestNand2(a=b[0..1], b=b[1..2], out=temp3);
 
-      TestNand16(a[0..7]=Nand16ResultL8, 
-                 b[8..15]=Nand16ResultH8, 
-                 out[0..1]=temp3);
+      TestNand16(a[0..7]=Nand16ResultL8,
+                 b[0..7]=Nand16ResultH8, 
+                 out[0]=out[1]);
 
-      TestNand2Way(a=temp2, b=temp3, out=out[1]);
+      TestNand2Way(a=temp3, b=temp3, out=out[2]);
 }
