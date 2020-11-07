@@ -8,11 +8,20 @@ class HdlConnection():
         self.pin1 = pin1
         self.pin2 = pin2
 
-        self.pin1BitIndex, self.pin1StartBitOfBus, self.pin1EndBitOfBus = (
-            self._SetPinBitParams(self.pin1.GetPinBitWidthString()))
+        self.UpdateConnectionBitWidths()
+        return
+
+    ##########################################################################
+    def UpdateConnectionBitWidths(self):
+        self.pin1BitIndex, self.pin1StartBitOfBus, self.pin1EndBitOfBus, self.pin1ConnectionWidth = (
+            self._SetInitialPinBitParams(self.pin1))
       
-        self.pin2BitIndex, self.pin2StartBitOfBus, self.pin2EndBitOfBus = (
-            self._SetPinBitParams(self.pin2.GetPinBitWidthString()))
+        self.pin2BitIndex, self.pin2StartBitOfBus, self.pin2EndBitOfBus, self.pin2ConnectionWidth = (
+            self._SetInitialPinBitParams(self.pin2))
+
+        # Update connection width for a connection with an output pin
+        if not self.IsConnectionToInput() and self.pin2.IsInternal():
+            self.pin2ConnectionWidth = self.pin1ConnectionWidth
         return
 
     ##########################################################################
@@ -30,20 +39,32 @@ class HdlConnection():
         return ("[%s%s : %s%s (%s)]" % (pin1Name, pin1Extra, pin2Name, pin2Extra, self.pin2.pinType))
 
     ##########################################################################
-    def _SetPinBitParams(self, bitWidthString):
-        pinBitIndex      = commonDefs.NO_BIT_VALUE
-        pinStartBitOfBus = commonDefs.NO_BIT_VALUE
-        pinEndBitOfBus   = commonDefs.NO_BIT_VALUE
+    def IsConnectionToInput(self):
+        return True if self.pin1.pinType == HdlPinTypes.Internal else False
+
+    ##########################################################################
+    def GetPin2ConnectionBitWidth(self):
+        return self.pin2ConnectionWidth
+
+    ##########################################################################
+    def _SetInitialPinBitParams(self, pin : HdlPin):
+        bitWidthString = pin.GetPinBitWidthString()
+        pinConnectionWidth = pin.bitWidth
+        pinBitIndex        = commonDefs.NO_BIT_VALUE
+        pinStartBitOfBus   = commonDefs.NO_BIT_VALUE
+        pinEndBitOfBus     = commonDefs.NO_BIT_VALUE
 
         if bitWidthString:
             if ".." in bitWidthString:
                 bitValues = bitWidthString.split("..")
-                pinStartBitOfBus = int(bitValues[0])
-                pinEndBitOfBus   = int(bitValues[1])
+                pinStartBitOfBus   = int(bitValues[0])
+                pinEndBitOfBus     = int(bitValues[1])
+                pinConnectionWidth = pinEndBitOfBus - pinStartBitOfBus + 1
             else:
-                pinBitIndex      = int(bitWidthString)   
+                pinBitIndex        = int(bitWidthString)
+                pinConnectionWidth = 1 
 
-        return pinBitIndex, pinStartBitOfBus, pinEndBitOfBus
+        return pinBitIndex, pinStartBitOfBus, pinEndBitOfBus, pinConnectionWidth
 
     ##########################################################################
     def _GetPinExtraStr(self, pinBitIndex, pinStartBitOfBus, pinEndBitOfBus):

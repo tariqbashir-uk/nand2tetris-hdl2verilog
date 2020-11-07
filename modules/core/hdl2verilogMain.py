@@ -56,6 +56,7 @@ class Hdl2verilogMain():
             hdlChipList.AddChip(hdlChip)
 
         hdlChipList.UpdateAllPin1BitWidths()
+        hdlChipList.UpdateAllPartConnections()
 
         for hdlChip in hdlChipList.chipList:  
             self.CreateVerilogModule(hdlChip, hdlChipList, outputFolder)
@@ -119,12 +120,12 @@ class Hdl2verilogMain():
 
         portList = []
         for inputPin in hdlChip.GetInputPinList(): #type: HdlPin
-            portList.append(self._HdlPinToVerilogPort(inputPin))
+            portList.append(self._HdlPinToVerilogPort(inputPin, inputPin.GetPinBitWidth()))
         verilogModuleTB.AddInputPorts(portList)
 
         portList = []
         for outputPin in hdlChip.GetOutputPinList(): #type: HdlPin
-            portList.append(self._HdlPinToVerilogPort(outputPin))
+            portList.append(self._HdlPinToVerilogPort(outputPin, outputPin.GetPinBitWidth()))
         verilogModuleTB.AddOutputPorts(portList)
         
         for setSequence in tstScript.setSequences: #type: TstSetSequence
@@ -148,12 +149,12 @@ class Hdl2verilogMain():
 
         portList = []
         for inputPin in hdlChip.GetInputPinList(): #type: HdlPin
-            portList.append(self._HdlPinToVerilogPort(inputPin))
+            portList.append(self._HdlPinToVerilogPort(inputPin, inputPin.GetPinBitWidth()))
         verilogMainModule.AddInputPorts(portList)
 
         portList = []
         for outputPin in hdlChip.GetOutputPinList(): #type: HdlPin
-            portList.append(self._HdlPinToVerilogPort(outputPin))
+            portList.append(self._HdlPinToVerilogPort(outputPin, outputPin.GetPinBitWidth()))
         verilogMainModule.AddOutputPorts(portList)
 
         verilogSubmoduleCalls = []
@@ -173,15 +174,15 @@ class Hdl2verilogMain():
                 pin1, pin2 = connection.GetPins() # type: HdlPin, HdlPin
               
                 # For internal pins we need to know their width and we can get this from the pin width of the chip that is being called
-                if pin1.IsOutput() and pin2.IsInternal():
-                    bitWidth = hdlChipList.GetBitWidthForPin(part.partName, pin1.pinName)
-                    # Check if we have a split pin output case, we can tell this is pin1.bitwidth is defined and different to the chip bitwidth */ 
-                    if pin1.bitWidth != bitWidth:
-                        bitWidth = pin1.bitWidth
-                    hdlChip.UpdatePin2Width(pin2.pinName, bitWidth)
+                # if pin1.IsOutput() and pin2.IsInternal():
+                #     bitWidth = connection.GetPin2ConnectionBitWidth()
+                #     # # Check if we have a split pin output case, we can tell this is pin1.bitwidth is defined and different to the chip bitwidth */ 
+                #     # if pin1.bitWidth != bitWidth:
+                #     #     bitWidth = pin1.bitWidth
+                #     hdlChip.UpdatePin2Width(pin2.pinName, bitWidth)
 
-                subModulePort     = self._HdlPinToVerilogPort(pin1)
-                internalParamPort = self._HdlPinToVerilogPort(pin2)
+                subModulePort     = self._HdlPinToVerilogPort(pin1, pin1.GetPinBitWidth())
+                internalParamPort = self._HdlPinToVerilogPort(pin2, connection.GetPin2ConnectionBitWidth())
 
                 keyName = pin1.pinName
                 if keyName not in pinDict:
@@ -204,7 +205,7 @@ class Hdl2verilogMain():
         return
 
     ##########################################################################
-    def _HdlPinToVerilogPort(self, hdlPin : HdlPin):
+    def _HdlPinToVerilogPort(self, hdlPin : HdlPin, bitWidth):
         portDirection = VerilogPortDirectionTypes.unknown
 
         if hdlPin.pinType == HdlPinTypes.Input:
@@ -212,7 +213,7 @@ class Hdl2verilogMain():
         elif hdlPin.pinType == HdlPinTypes.Output:
             portDirection = VerilogPortDirectionTypes.output
 
-        return VerilogPort(hdlPin.pinName, portDirection, "", hdlPin.GetPinBitWidth(), hdlPin.IsInternal())
+        return VerilogPort(hdlPin.pinName, portDirection, "", bitWidth, hdlPin.IsInternal())
 
     ##########################################################################
     def _GetFilesWithExtInFolder(self, folder, ext):

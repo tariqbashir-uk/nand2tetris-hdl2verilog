@@ -40,6 +40,14 @@ class HdlChipList():
         return
 
     ##########################################################################
+    def UpdateAllPartConnections(self):
+        for hdlChip in self.chipList:
+            for part in hdlChip.partList: # type: HdlChipPart
+                for connection in part.connections: # type: HdlConnection
+                    connection.UpdateConnectionBitWidths()
+        return
+
+    ##########################################################################
     def GetPin(self, chipName, pinName):
         pin     = None
         hdlChip = self.GetChip(chipName)
