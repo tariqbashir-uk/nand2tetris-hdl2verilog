@@ -10,6 +10,7 @@ from modules.hdlTypes.hdlChipList import HdlChipList
 from modules.hdlTypes.hdlChip import HdlChip
 from modules.hdlTypes.hdlChipPart import HdlChipPart
 from modules.hdlTypes.hdlConnection import HdlConnection
+from modules.hdlTypes.hdlConnectionTypes import HdlConnectionTypes
 from modules.hdlTypes.hdlPin import HdlPin
 from modules.hdlTypes.hdlPinTypes import HdlPinTypes
 
@@ -28,6 +29,7 @@ from modules.generator.verilogModuleGenerator import VerilogModuleGenerator
 from modules.generator.verilogTestBenchGenerator import VerilogTestBenchGenerator
 
 import modules.settings as settings
+import modules.commonDefs as commonDefs
 
 class Hdl2verilogMain():
     def __init__(self):
@@ -173,28 +175,46 @@ class Hdl2verilogMain():
             for connection in connections:
                 pin1, pin2 = connection.GetPins() # type: HdlPin, HdlPin
               
-                # For internal pins we need to know their width and we can get this from the pin width of the chip that is being called
-                # if pin1.IsOutput() and pin2.IsInternal():
-                #     bitWidth = connection.GetPin2ConnectionBitWidth()
-                #     # # Check if we have a split pin output case, we can tell this is pin1.bitwidth is defined and different to the chip bitwidth */ 
-                #     # if pin1.bitWidth != bitWidth:
-                #     #     bitWidth = pin1.bitWidth
-                #     hdlChip.UpdatePin2Width(pin2.pinName, bitWidth)
+                toPort   = self._HdlPinToVerilogPort(pin1, pin1.GetPinBitWidth())
+                fromPort = self._HdlPinToVerilogPort(pin2, connection.pin2ConnectionWidth)
 
-                subModulePort     = self._HdlPinToVerilogPort(pin1, pin1.GetPinBitWidth())
-                internalParamPort = self._HdlPinToVerilogPort(pin2, connection.GetPin2ConnectionBitWidth())
-
+                # bit range  <-- input bit range
+                # all bits   <-- input all bits (different bit length)
+ 
                 keyName = pin1.pinName
                 if keyName not in pinDict:
-                    pinDict[keyName] = VerilogSubmoduleCallParam(subModulePort, 
-                                                                 internalParamPort, 
-                                                                 connection.pin2StartBitOfBus,
-                                                                 connection.pin2EndBitOfBus,
-                                                                 connection.pin2BitIndex)
+                    pinDict[keyName] = VerilogSubmoduleCallParam(toPort, fromPort)         
                     verilogSubmoduleCall.AddCallParam(pinDict[keyName])
+                
+                pin1BitIndex, pin1StartBitOfBus, pin1EndBitOfBus, pin1ConnectionWidth, pin1ConnectionType = connection.GetPin1Params()
+                pin2BitIndex, pin2StartBitOfBus, pin2EndBitOfBus, pin2ConnectionWidth, pin2ConnectionType = connection.GetPin2Params()
+
+                paramFullName = self._MakeParamFullName(pin2.pinName, pin2BitIndex, pin2StartBitOfBus, pin2EndBitOfBus)
+
+                if pin1ConnectionType == HdlConnectionTypes.AllBits:
+                    # Cases:
+                    # all bits   <-- input all bits (same bit length)
+                    # all bits   <-- input single bit
+                    # all bits   <-- input bit range
+                    # all bits   <-- internal all bits
+                    pinDict[keyName].AddAllBitMapping(paramFullName)
+                elif (pin1ConnectionType == HdlConnectionTypes.BitRange and 
+                      pin2ConnectionType == HdlConnectionTypes.SingleBit):
+                    # Cases:
+                    # bit range  <-- input all bits
+                    # bit range  <-- internal all bits
+                    for i in range(connection.pin1StartBitOfBus, connection.pin1EndBitOfBus):
+                        pinDict[keyName].AddSingleBitMapping(i, paramFullName)
+                elif pin1ConnectionType == HdlConnectionTypes.BitRange and pin2ConnectionType == HdlConnectionTypes.AllBits:
+                    # Cases:
+                    # bit range  <-- input bit range
+                    pinDict[keyName].AddMultiBitMapping(paramFullName)
                 else:
-                    # Handling case where input bits are made from concatinated internal variable bits
-                    pinDict[keyName].IncrementBitCount()
+                    # Cases:
+                    # single bit <-- input all bits     
+                    # single bit <-- input single bit 
+                    # single bit <-- internal all bits
+                    pinDict[keyName].AddSingleBitMapping(connection.pin1BitIndex, paramFullName)
 
             verilogSubmoduleCalls.append(verilogSubmoduleCall)
 
@@ -203,6 +223,18 @@ class Hdl2verilogMain():
         #print(moduleCalls)
         verilogModGen.CreateModule(verilogMainModule)
         return
+
+    ##########################################################################
+    def _MakeParamFullName(self, pinName, pinBitIndex, pinStartBitOfBus, pinEndBitOfBus):
+        paramName  = pinName
+        paramExtra = ""
+
+        if pinBitIndex != commonDefs.NO_BIT_VALUE:
+            paramExtra += "[" + str(pinBitIndex) + "]"
+        elif pinStartBitOfBus != commonDefs.NO_BIT_VALUE:
+            paramExtra += "[" + str(pinEndBitOfBus) + ":"  + str(pinStartBitOfBus) +  "]"
+
+        return ("%s%s" % (paramName, paramExtra))
 
     ##########################################################################
     def _HdlPinToVerilogPort(self, hdlPin : HdlPin, bitWidth):

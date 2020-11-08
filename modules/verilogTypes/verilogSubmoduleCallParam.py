@@ -1,54 +1,58 @@
 from modules.verilogTypes.verilogPort import VerilogPort
+from modules.core.logger import Logger
 
 import modules.commonDefs as commonDefs
 
 class VerilogSubmoduleCallParam():
-    def __init__(self, 
-                 subModulePort : VerilogPort,
-                 internalParamPort : VerilogPort,
-                 startBitOfBus = commonDefs.NO_BIT_VALUE,
-                 endBitOfBus   = commonDefs.NO_BIT_VALUE,
-                 bitIndex      = commonDefs.NO_BIT_VALUE):
+    def __init__(self, toPort : VerilogPort, fromPort):
 
-        self.subModulePort     = subModulePort
-        self.internalParamPort = internalParamPort
-        self.bitCount          = 1
-
-        self.startBitOfBus = startBitOfBus
-        self.endBitOfBus   = endBitOfBus
-        self.bitIndex      = bitIndex               
+        self.toPort     = toPort
+        self.fromPort   = fromPort
+        self.bitMapping = None
+        self.logger     = Logger()
         return
 
     ##########################################################################
-    def IncrementBitCount(self):
-        self.bitCount += 1
+    def AddAllBitMapping(self, fromName):
+        if not self.bitMapping:
+            self.bitMapping = [fromName] * 1
         return
+
+    ##########################################################################
+    def AddMultiBitMapping(self, fromName):
+        if not self.bitMapping:
+            self.bitMapping = []
+        self.bitMapping.append(fromName)
+        return
+
+    ##########################################################################
+    def AddSingleBitMapping(self, bitNumber, fromName):
+        if not self.bitMapping:
+            self.bitMapping = ["false"] * self.toPort.portBitWidth
+        
+        if bitNumber >= len(self.bitMapping):
+            self.logger.Error("SubmoduleCallParam %s: Portwidth = %d, but trying to set single bit number %d" % 
+                               (self.toPort.portName, self.toPort.portBitWidth, bitNumber))
+        else:
+            self.bitMapping[len(self.bitMapping) - bitNumber - 1] = fromName
+        return
+
+    ##########################################################################
+    def IsFromPortInternal(self):
+        return True if self.fromPort and self.fromPort.IsInternal() else False
 
     ##########################################################################
     def GetParamNameForCall(self):
-        paramName     = ""
-        paramNameList = [self.internalParamPort for i in range(self.bitCount)]
+        paramName = ""
 
-        if self.bitCount == 1:
-            if self.bitIndex == commonDefs.NO_BIT_VALUE:
-                paramName = self.internalParamPort.portName
-            else:
-                paramName = self.internalParamPort.portName + "[" + str(self.bitIndex) + "]"
-        else:
-            paramName += "{" 
-            if self.bitIndex == commonDefs.NO_BIT_VALUE:
-                paramName += ', '.join([x.portName for x in paramNameList])
-            else:
-                paramName += ', '.join([x.portName + "[" + str(self.bitIndex) + "]" for x in paramNameList])
-                #paramName += ', '.join([x.GetPortStr() for x in paramNameList])
-            paramName += "}" 
-
+        if self.bitMapping and len(self.bitMapping) == 1:
+            paramName += self.bitMapping[0]
+        elif self.bitMapping:
+            paramName += "{"
+            paramName += ', '.join(x for x in self.bitMapping)
+            paramName += "}"
         return paramName
 
     ##########################################################################
     def GetCallStr(self):
-        paramStr = self.internalParamPort.portName
-        if self.bitIndex != commonDefs.NO_BIT_VALUE:
-            paramStr += "[" + str(self.bitIndex) + "]"
-
-        return self.subModulePort.portName + " : " + paramStr
+        return self.fromPort.portName

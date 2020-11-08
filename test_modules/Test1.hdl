@@ -8,7 +8,7 @@ CHIP Test1 {
       Nand(a=a[0], b=b[0], out=temp);
       Nand(a=a[0], b=b[1], out=temp2);
 
-      TestNand16(a[0]=temp, a[1]=temp, a[2]=temp, a[3]=temp, a[4]=temp, a[5]=temp, a[6]=temp, a[7]=temp, 
+      TestNand16(a[0]=a[1], a[1]=b[2], a[2]=temp, a[3]=temp, a[4]=temp, a[5]=temp, a[6]=temp, a[7]=temp, 
                  a[8]=temp2, a[9]=temp2, a[10]=temp2, a[11]=temp2, a[12]=temp2, a[13]=temp2, a[14]=temp2, a[15]=temp2,
                  b[0]=temp, b[1]=temp, b[2]=temp, b[3]=temp, b[4]=temp, b[5]=temp, b[6]=temp, b[7]=temp, 
                  b[8]=temp2, b[9]=temp2, b[10]=temp2, b[11]=temp2, b[12]=temp2, b[13]=temp2, b[14]=temp2, b[15]=temp2,             

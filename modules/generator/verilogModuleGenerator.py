@@ -35,8 +35,8 @@ class VerilogModuleGenerator:
         for submoduleCall in verilogMainModule.GetSubmoduleCalls(): # type: VerilogSubmoduleCall
             callParamStr = []
             for callParam in submoduleCall.GetCallParams(): # type: VerilogSubmoduleCallParam
-                if callParam.internalParamPort.IsInternal():
-                    keyName = callParam.internalParamPort.GetPortStr()
+                if callParam.IsFromPortInternal():
+                    keyName = callParam.fromPort.GetPortStr()
                     if keyName not in internalVarDict:
                         internalVarDict[keyName] = 0
                         verilogText += ("wire %s;\n" % (keyName))
@@ -48,7 +48,7 @@ class VerilogModuleGenerator:
         for submoduleCall in verilogMainModule.GetSubmoduleCalls(): # type: VerilogSubmoduleCall
             callParamStr = []
             for callParam in submoduleCall.GetCallParams(): # type: VerilogSubmoduleCallParam
-                callParamStr.append(("    .%s (%s)" % (callParam.subModulePort.portName, callParam.GetParamNameForCall())))
+                callParamStr.append(("    .%s (%s)" % (callParam.toPort.portName, callParam.GetParamNameForCall())))
 
             verilogText += ("%s %s(\n%s);\n" % (submoduleCall.GetModuleName(), 
                                                 submoduleCall.GetModuleCallName(), 
