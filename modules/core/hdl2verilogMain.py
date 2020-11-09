@@ -5,28 +5,10 @@ from modules.core.logger import Logger
 
 from modules.core.textFile import TextFile
 
+from modules.fileHandlers.tstFile import TstFile
 from modules.fileHandlers.hdlFile import HdlFile
 from modules.hdlTypes.hdlChipList import HdlChipList
-from modules.hdlTypes.hdlChip import HdlChip
-from modules.hdlTypes.hdlChipPart import HdlChipPart
-from modules.hdlTypes.hdlConnection import HdlConnection
-from modules.hdlTypes.hdlConnectionTypes import HdlConnectionTypes
-from modules.hdlTypes.hdlPin import HdlPin
-from modules.hdlTypes.hdlPinTypes import HdlPinTypes
-
-from modules.fileHandlers.tstFile import TstFile
-from modules.tstTypes.tstScript import TstScript
-from modules.tstTypes.tstSetSequence import TstSetSequence
-from modules.tstTypes.tstSetOperation import TstSetOperation
-
-from modules.verilogTypes.verilogModule import VerilogModule
-from modules.verilogTypes.verilogModuleTB import VerilogModuleTB
-from modules.verilogTypes.verilogPort import VerilogPort
-from modules.verilogTypes.verilogPortDirectionTypes import VerilogPortDirectionTypes
-from modules.verilogTypes.verilogSubmoduleCall import VerilogSubmoduleCall
-from modules.verilogTypes.verilogSubmoduleCallParam import VerilogSubmoduleCallParam
-from modules.generator.verilogModuleGenerator import VerilogModuleGenerator
-from modules.generator.verilogTestBenchGenerator import VerilogTestBenchGenerator
+from modules.mappers.hdlToVerilogMapper import HdlToVerilogMapper
 
 import modules.settings as settings
 import modules.commonDefs as commonDefs
@@ -35,6 +17,7 @@ class Hdl2verilogMain():
     def __init__(self):
         self.logger      = Logger()
         self.fileActions = FileActions()
+        self.mapper      = HdlToVerilogMapper()
         return
 
     ##########################################################################
@@ -61,7 +44,7 @@ class Hdl2verilogMain():
         hdlChipList.UpdateAllPartConnections()
 
         for hdlChip in hdlChipList.chipList:  
-            self.CreateVerilogModule(hdlChip, hdlChipList, outputFolder)
+            self.mapper.CreateVerilogModule(hdlChip, hdlChipList, outputFolder)
 
         tstFilenames = self._GetFilesWithExtInFolder(inputFolder, 'tst')
         
@@ -75,7 +58,7 @@ class Hdl2verilogMain():
             tstScripts.append(tstScript)
 
             tstScript.testChip = hdlChipList.GetChip(tstScript.testHdlModule)            
-            self.CreateVerilogModuleTB(tstScript, outputFolder)
+            self.mapper.CreateVerilogModuleTB(tstScript, outputFolder)
             tstsToRun.append(tstScript)
 
             #print(hdlChip.GetChipDependencyList())
@@ -109,143 +92,6 @@ class Hdl2verilogMain():
         nandContents += "endmodule\n"
         nand_v.WriteFile(nandContents)
         return
-
-    ##########################################################################
-    def CreateVerilogModuleTB(self, tstScript : TstScript, outputFolder):
-        hdlChip       = tstScript.testChip
-        verilogModGen = VerilogTestBenchGenerator(outputFolder)
-
-        verilogModuleTB = VerilogModuleTB(tstScript.testName + "_tb",
-                                          tstScript.testHdlModule,
-                                          tstScript.testHdlModule + ".vcd",
-                                          tstScript.outputFile)
-
-        portList = []
-        for inputPin in hdlChip.GetInputPinList(): #type: HdlPin
-            portList.append(self._HdlPinToVerilogPort(inputPin, inputPin.GetPinBitWidth()))
-        verilogModuleTB.AddInputPorts(portList)
-
-        portList = []
-        for outputPin in hdlChip.GetOutputPinList(): #type: HdlPin
-            portList.append(self._HdlPinToVerilogPort(outputPin, outputPin.GetPinBitWidth()))
-        verilogModuleTB.AddOutputPorts(portList)
-        
-        for setSequence in tstScript.setSequences: #type: TstSetSequence
-            testSequenceV = []
-            for setOperation in setSequence.setOperations: #type: TstSetOperation
-                testSequenceV.append(TstSetOperation(setOperation.pinName, setOperation.pinValue.replace("%B", "'b")))
-
-            verilogModuleTB.AddTestSequence(TstSetSequence(testSequenceV))
-
-        #verilogModuleTB.DumpModuleDetails()
-        verilogModGen.CreateModule(verilogModuleTB)
-        return
-
-    ##########################################################################
-    def CreateVerilogModule(self, hdlChip : HdlChip, hdlChipList : HdlChipList, outputFolder):
-        verilogModGen = VerilogModuleGenerator(outputFolder)
-
-        partList = hdlChip.GetChipPartList() #type: list[HdlChipPart]
-
-        verilogMainModule = VerilogModule(hdlChip.chipName)
-
-        portList = []
-        for inputPin in hdlChip.GetInputPinList(): #type: HdlPin
-            portList.append(self._HdlPinToVerilogPort(inputPin, inputPin.GetPinBitWidth()))
-        verilogMainModule.AddInputPorts(portList)
-
-        portList = []
-        for outputPin in hdlChip.GetOutputPinList(): #type: HdlPin
-            portList.append(self._HdlPinToVerilogPort(outputPin, outputPin.GetPinBitWidth()))
-        verilogMainModule.AddOutputPorts(portList)
-
-        verilogSubmoduleCalls = []
-        verilogSubmoduleDict  = {}
-        for part in partList:
-            connections = part.GetConnections() #type: list[HdlConnection]
-
-            if part.partName not in verilogSubmoduleDict:
-                verilogSubmoduleDict[part.partName] = 0
-            else:
-                verilogSubmoduleDict[part.partName] += 1
-
-            verilogSubmoduleCall = VerilogSubmoduleCall(part.partName, verilogSubmoduleDict[part.partName])
-
-            pinDict = {}
-            for connection in connections:
-                pin1, pin2 = connection.GetPins() # type: HdlPin, HdlPin
-              
-                toPort   = self._HdlPinToVerilogPort(pin1, pin1.GetPinBitWidth())
-                fromPort = self._HdlPinToVerilogPort(pin2, connection.pin2ConnectionWidth)
-
-                # bit range  <-- input bit range
-                # all bits   <-- input all bits (different bit length)
- 
-                keyName = pin1.pinName
-                if keyName not in pinDict:
-                    pinDict[keyName] = VerilogSubmoduleCallParam(toPort, fromPort)         
-                    verilogSubmoduleCall.AddCallParam(pinDict[keyName])
-                
-                pin1BitIndex, pin1StartBitOfBus, pin1EndBitOfBus, pin1ConnectionWidth, pin1ConnectionType = connection.GetPin1Params()
-                pin2BitIndex, pin2StartBitOfBus, pin2EndBitOfBus, pin2ConnectionWidth, pin2ConnectionType = connection.GetPin2Params()
-
-                paramFullName = self._MakeParamFullName(pin2.pinName, pin2BitIndex, pin2StartBitOfBus, pin2EndBitOfBus)
-
-                if pin1ConnectionType == HdlConnectionTypes.AllBits:
-                    # Cases:
-                    # all bits   <-- input all bits (same bit length)
-                    # all bits   <-- input single bit
-                    # all bits   <-- input bit range
-                    # all bits   <-- internal all bits
-                    pinDict[keyName].AddAllBitMapping(paramFullName)
-                elif (pin1ConnectionType == HdlConnectionTypes.BitRange and 
-                      pin2ConnectionType == HdlConnectionTypes.SingleBit):
-                    # Cases:
-                    # bit range  <-- input all bits
-                    # bit range  <-- internal all bits
-                    for i in range(connection.pin1StartBitOfBus, connection.pin1EndBitOfBus):
-                        pinDict[keyName].AddSingleBitMapping(i, paramFullName)
-                elif pin1ConnectionType == HdlConnectionTypes.BitRange and pin2ConnectionType == HdlConnectionTypes.AllBits:
-                    # Cases:
-                    # bit range  <-- input bit range
-                    pinDict[keyName].AddMultiBitMapping(paramFullName)
-                else:
-                    # Cases:
-                    # single bit <-- input all bits     
-                    # single bit <-- input single bit 
-                    # single bit <-- internal all bits
-                    pinDict[keyName].AddSingleBitMapping(connection.pin1BitIndex, paramFullName)
-
-            verilogSubmoduleCalls.append(verilogSubmoduleCall)
-
-        verilogMainModule.AddSubmoduleCalls(verilogSubmoduleCalls)
-        verilogMainModule.DumpModuleDetails()
-        #print(moduleCalls)
-        verilogModGen.CreateModule(verilogMainModule)
-        return
-
-    ##########################################################################
-    def _MakeParamFullName(self, pinName, pinBitIndex, pinStartBitOfBus, pinEndBitOfBus):
-        paramName  = pinName
-        paramExtra = ""
-
-        if pinBitIndex != commonDefs.NO_BIT_VALUE:
-            paramExtra += "[" + str(pinBitIndex) + "]"
-        elif pinStartBitOfBus != commonDefs.NO_BIT_VALUE:
-            paramExtra += "[" + str(pinEndBitOfBus) + ":"  + str(pinStartBitOfBus) +  "]"
-
-        return ("%s%s" % (paramName, paramExtra))
-
-    ##########################################################################
-    def _HdlPinToVerilogPort(self, hdlPin : HdlPin, bitWidth):
-        portDirection = VerilogPortDirectionTypes.unknown
-
-        if hdlPin.pinType == HdlPinTypes.Input:
-            portDirection = VerilogPortDirectionTypes.input
-        elif hdlPin.pinType == HdlPinTypes.Output:
-            portDirection = VerilogPortDirectionTypes.output
-
-        return VerilogPort(hdlPin.pinName, portDirection, "", bitWidth, hdlPin.IsInternal())
 
     ##########################################################################
     def _GetFilesWithExtInFolder(self, folder, ext):
