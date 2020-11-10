@@ -22,18 +22,24 @@ class HdlChip():
     def AddInputPins(self, inputs):
         #self.logger.Debug("AddInputPins: %d" % (len(inputs)))
         for inputPin in inputs:
+            bitWidthString = "[1]"
+            if inputPin.bitWidthString:
+                bitWidthString = inputPin.bitWidthString
             self.inputPins.append(HdlPin(inputPin.pinName, 
                                          pinType=HdlPinTypes.Input, 
-                                         bitWidthString=inputPin.bitWidthString))
+                                         bitWidthString=bitWidthString))
         return
 
     ##########################################################################
     def AddOutputPins(self, outputs):
         #self.logger.Debug("AddOutputPins: %d" % (len(outputs)))
         for outputPin in outputs:
+            bitWidthString = "[1]"
+            if outputPin.bitWidthString:
+                bitWidthString = outputPin.bitWidthString
             self.outputPins.append(HdlPin(outputPin.pinName, 
                                           pinType=HdlPinTypes.Output, 
-                                          bitWidthString=outputPin.bitWidthString))
+                                          bitWidthString=bitWidthString))
         return
 
     ##########################################################################

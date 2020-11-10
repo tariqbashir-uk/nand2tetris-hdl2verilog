@@ -1,4 +1,5 @@
 from modules.core.logger import Logger
+from modules.hdlTypes.hdlNandChip import HdlNandChip
 from modules.hdlTypes.hdlChip import HdlChip
 from modules.hdlTypes.hdlPin import HdlPin
 from modules.hdlTypes.hdlPinTypes import HdlPinTypes
@@ -24,6 +25,9 @@ class HdlChipList():
                 result = hdlChip
                 break
 
+        if not result and chipName == 'Nand':
+            result = HdlNandChip.GetChip()
+
         return result
 
     ##########################################################################
@@ -31,11 +35,10 @@ class HdlChipList():
         for hdlChip in self.chipList:
             for part in hdlChip.partList: # type: HdlChipPart
                 for connection in part.connections: # type: HdlConnection
-                    if part.partName != 'Nand':
-                        pin      = self.GetPin(part.partName, connection.pin1.pinName) # type: HdlPin
-                        bitWidth = self.GetBitWidthForPin(part.partName, pin.pinName)
-                        hdlChip.UpdatePin1Width(part.partName, pin.pinName, bitWidth)
-                        hdlChip.UpdatePin1Type(pin.pinName, pin.pinType)
+                    pin      = self.GetPin(part.partName, connection.pin1.pinName) # type: HdlPin
+                    bitWidth = self.GetBitWidthForPin(part.partName, pin.pinName)
+                    hdlChip.UpdatePin1Width(part.partName, pin.pinName, bitWidth)
+                    hdlChip.UpdatePin1Type(pin.pinName, pin.pinType)
 
         return
 

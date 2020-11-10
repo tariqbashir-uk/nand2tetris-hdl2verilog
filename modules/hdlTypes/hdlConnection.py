@@ -57,7 +57,7 @@ class HdlConnection():
 
     ##########################################################################
     def _SetInitialPinBitParams(self, pin : HdlPin):
-        bitWidthString = pin.GetPinBitWidthString()
+        bitWidthString     = pin.GetPinBitWidthString()
         pinConnectionWidth = pin.bitWidth
         pinBitIndex        = commonDefs.NO_BIT_VALUE
         pinStartBitOfBus   = commonDefs.NO_BIT_VALUE

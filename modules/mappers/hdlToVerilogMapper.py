@@ -96,50 +96,11 @@ class HdlToVerilogMapper():
                 toPort   = self._HdlPinToVerilogPort(pin1, pin1.GetPinBitWidth())
                 fromPort = self._HdlPinToVerilogPort(pin2, connection.pin2ConnectionWidth)
 
-                # Note: Cases todo..
-                # bit range  <-- input bit range
-                # all bits   <-- input all bits (different bit length)
- 
                 keyName = pin1.pinName
                 if keyName not in paramMapperDict:
-                    # pinDict[keyName] = VerilogSubmoduleCallParam(toPort, fromPort)         
-                    # verilogSubmoduleCall.AddCallParam(pinDict[keyName])
-
                     paramMapperDict[keyName] = HdlToVerilogParamMapper(toPort, fromPort)         
-                    #verilogSubmoduleCall.AddCallParam(pinDict[keyName])
                 
-                pin1BitIndex, pin1StartBitOfBus, pin1EndBitOfBus, pin1ConnectionWidth, pin1ConnectionType = connection.GetPin1Params()
-                pin2BitIndex, pin2StartBitOfBus, pin2EndBitOfBus, pin2ConnectionWidth, pin2ConnectionType = connection.GetPin2Params()
-
-                paramFullName = self._MakeParamFullName(pin2.pinName, pin2BitIndex, pin2StartBitOfBus, pin2EndBitOfBus)
-
-                # Cases:
-                # all bits   <-- input all bits (same bit length)
-                # all bits   <-- input single bit
-                # all bits   <-- input bit range
-                # all bits   <-- internal all bits
-                if pin1ConnectionType == HdlConnectionTypes.AllBits:
-                    paramMapperDict[keyName].AddAllBitMapping(paramFullName, pin1ConnectionWidth)
-
-                # Cases:
-                # bit range  <-- input all bits
-                # bit range  <-- internal all bits
-                elif (pin1ConnectionType == HdlConnectionTypes.BitRange and 
-                      pin2ConnectionType == HdlConnectionTypes.SingleBit):
-                    for hdlBitNumber in range(connection.pin1StartBitOfBus, connection.pin1EndBitOfBus):
-                        paramMapperDict[keyName].AddSingleBitMapping(hdlBitNumber, paramFullName)
-
-                # Cases:
-                # bit range  <-- input bit range
-                elif pin1ConnectionType == HdlConnectionTypes.BitRange and pin2ConnectionType == HdlConnectionTypes.AllBits:
-                    paramMapperDict[keyName].AddMultiBitMapping(paramFullName, pin1StartBitOfBus, pin1EndBitOfBus)
-
-                # Cases:
-                # single bit <-- input all bits     
-                # single bit <-- input single bit 
-                # single bit <-- internal all bits
-                else:
-                    paramMapperDict[keyName].AddSingleBitMapping(connection.pin1BitIndex, paramFullName)
+                paramMapperDict[keyName].AddHdlConnection(connection)
 
             if part.partName not in verilogSubmoduleDict:
                 verilogSubmoduleDict[part.partName] = 0
@@ -149,6 +110,7 @@ class HdlToVerilogMapper():
             verilogSubmoduleCall = VerilogSubmoduleCall(part.partName, verilogSubmoduleDict[part.partName])
 
             for paramMapper in paramMapperDict:
+                paramMapperDict[paramMapper].DoMapping()
                 paramMapperDict[paramMapper].FinaliseParamList()
                 paramList = paramMapperDict[paramMapper].GetParamList()
                 verilogSubmoduleCallParam = VerilogSubmoduleCallParam(paramMapperDict[paramMapper].toPort,
@@ -164,18 +126,6 @@ class HdlToVerilogMapper():
         #print(moduleCalls)
         verilogModGen.CreateModule(verilogMainModule)
         return
-
-    ##########################################################################
-    def _MakeParamFullName(self, pinName, pinBitIndex, pinStartBitOfBus, pinEndBitOfBus):
-        paramName  = pinName
-        paramExtra = ""
-
-        if pinBitIndex != commonDefs.NO_BIT_VALUE:
-            paramExtra += "[" + str(pinBitIndex) + "]"
-        elif pinStartBitOfBus != commonDefs.NO_BIT_VALUE:
-            paramExtra += "[" + str(pinEndBitOfBus) + ":"  + str(pinStartBitOfBus) +  "]"
-
-        return ("%s%s" % (paramName, paramExtra))
 
     ##########################################################################
     def _HdlPinToVerilogPort(self, hdlPin : HdlPin, bitWidth):
