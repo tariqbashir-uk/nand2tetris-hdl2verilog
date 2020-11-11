@@ -41,6 +41,7 @@ class Hdl2verilogMain():
             hdlChipList.AddChip(hdlChip)
 
         hdlChipList.UpdateAllPin1BitWidths()
+        hdlChipList.UpdateAllPin2BitWidths()
         hdlChipList.UpdateAllPartConnections()
 
         for hdlChip in hdlChipList.chipList:  

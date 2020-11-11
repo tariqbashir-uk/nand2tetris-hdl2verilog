@@ -43,6 +43,18 @@ class HdlChipList():
         return
 
     ##########################################################################
+    def UpdateAllPin2BitWidths(self):
+        for hdlChip in self.chipList:
+            for part in hdlChip.partList: # type: HdlChipPart
+                for connection in part.connections: # type: HdlConnection
+                    pin1, pin2 = connection.GetPins()
+                    if pin1.pinType == HdlPinTypes.Output and pin2.pinType == HdlPinTypes.Internal:
+                        pin      = self.GetPin(part.partName, connection.pin1.pinName) # type: HdlPin
+                        bitWidth = self.GetBitWidthForPin(part.partName, pin.pinName)
+                        hdlChip.UpdatePin2Width(pin.pinName, bitWidth)
+        return
+
+    ##########################################################################
     def UpdateAllPartConnections(self):
         for hdlChip in self.chipList:
             for part in hdlChip.partList: # type: HdlChipPart

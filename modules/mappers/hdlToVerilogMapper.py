@@ -111,7 +111,6 @@ class HdlToVerilogMapper():
 
             for paramMapper in paramMapperDict:
                 paramMapperDict[paramMapper].DoMapping()
-                paramMapperDict[paramMapper].FinaliseParamList()
                 paramList = paramMapperDict[paramMapper].GetParamList()
                 verilogSubmoduleCallParam = VerilogSubmoduleCallParam(paramMapperDict[paramMapper].toPort,
                                                                       paramMapperDict[paramMapper].fromPort,
