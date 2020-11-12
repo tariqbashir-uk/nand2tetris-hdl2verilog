@@ -33,8 +33,8 @@ class HdlToVerilogParamMapper():
     def __init__(self, toPort : VerilogPort, fromPort : VerilogPort):
         self.toPort         = toPort
         self.fromPort       = fromPort
-        self.paramList      = []
         self.logger         = Logger()
+        self.paramList      = []
         self.hdlConnections = [] #type: list[HdlConnection]
         return
 
@@ -61,7 +61,11 @@ class HdlToVerilogParamMapper():
             pin1BitIndex, pin1StartBitOfBus, pin1EndBitOfBus, pin1ConnectionWidth, pin1ConnectionType = connection.GetPin1Params()
             pin2BitIndex, pin2StartBitOfBus, pin2EndBitOfBus, pin2ConnectionWidth, pin2ConnectionType = connection.GetPin2Params()
 
-            paramFullName = self._MakeParamFullName(pin2.pinName, pin2BitIndex, pin2StartBitOfBus, pin2EndBitOfBus)
+            paramFullName = self._MakeParamFullName(pin2.pinName,
+                                                    pin2BitIndex,
+                                                    pin2StartBitOfBus,
+                                                    pin2EndBitOfBus,
+                                                    True if pin1.pinType == HdlPinTypes.Input else False)
 
             # Cases:
             # all bits   <-- input all bits (same bit length)
@@ -153,9 +157,17 @@ class HdlToVerilogParamMapper():
         return totalBits
     
     ##########################################################################
-    def _MakeParamFullName(self, pinName, pinBitIndex, pinStartBitOfBus, pinEndBitOfBus):
+    def _MakeParamFullName(self, pinName, pinBitIndex, pinStartBitOfBus, pinEndBitOfBus, isInputPin):
         paramName  = pinName
         paramExtra = ""
+
+        # If the pin is an Input then swap false to 1'b0
+        if isInputPin and pinName == 'false':
+            paramName = "1'b0"
+
+        # If the pin is an Input then swap true to 1'b1
+        if isInputPin and pinName == 'true':
+            paramName = "1'b1"
 
         if pinBitIndex != commonDefs.NO_BIT_VALUE:
             paramExtra += "[" + str(pinBitIndex) + "]"
