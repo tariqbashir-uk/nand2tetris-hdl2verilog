@@ -14,6 +14,7 @@ class VerilogModuleTB():
         self.outFilename    = outFilename
         self.inputPorts     = []
         self.outputPorts    = []
+        self.outputFormats  = []
         self.testSequences  = []
         return
 
@@ -29,6 +30,12 @@ class VerilogModuleTB():
         self.logger.Debug("AddOutputPorts: %d" % (len(outputs)))
         for outputPort in outputs:
             self.outputPorts.append(outputPort)
+        return
+
+    ##########################################################################
+    def AddOutputFormatList(self, outputFormatList):
+        self.logger.Debug("AddOutputFormatList: %d" % (len(outputFormatList)))
+        self.outputFormatList = outputFormatList
         return
 
     ##########################################################################
@@ -51,6 +58,10 @@ class VerilogModuleTB():
     ##########################################################################
     def GetOutputPortList(self):
         return self.outputPorts
+
+    ##########################################################################
+    def GetOutputFormatList(self):
+        return self.outputFormatList
 
     ##########################################################################
     def DumpModuleDetails(self):

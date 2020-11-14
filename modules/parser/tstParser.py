@@ -168,7 +168,7 @@ class TstParser:
 
     def p_output_list(self, p):
         '''output_list : output DASH list output_param_list SEMICOLON'''
-        self.tstScript.SetOutputFormat(p[4])
+        self.tstScript.SetOutputFormatList(p[4])
         #print("output_list: " + str(p[4]))
         return
 

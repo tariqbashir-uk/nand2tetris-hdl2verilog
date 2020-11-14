@@ -41,7 +41,7 @@ class HdlToVerilogMapper():
 
         verilogModuleTB = VerilogModuleTB(tstScript.testName + "_tb",
                                           tstScript.testHdlModule,
-                                          tstScript.testHdlModule + ".vcd",
+                                          tstScript.testName + ".vcd",
                                           tstScript.outputFile)
 
         portList = []
@@ -53,6 +53,8 @@ class HdlToVerilogMapper():
         for outputPin in hdlChip.GetOutputPinList(): #type: HdlPin
             portList.append(self._HdlPinToVerilogPort(outputPin, outputPin.GetPinBitWidth()))
         verilogModuleTB.AddOutputPorts(portList)
+        
+        verilogModuleTB.AddOutputFormatList(tstScript.GetOutputFormatList())
         
         for setSequence in tstScript.setSequences: #type: TstSetSequence
             testSequenceV = []
