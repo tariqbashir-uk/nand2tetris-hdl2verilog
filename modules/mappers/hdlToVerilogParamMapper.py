@@ -74,7 +74,7 @@ class HdlToVerilogParamMapper():
             # all bits   <-- internal all bits
             if pin1ConnectionType == HdlConnectionTypes.AllBits:
                 if pin1BitWidth != pin2ConnectionWidth:
-                    self.logger.Error("Mapping all input bits of '%s' to '%s' but bit sizes differ. (Pin size: %d, connection size: %d" %
+                    self.logger.Error("Mapping all input bits of '%s' to '%s' but bit sizes differ. (Pin size: %d, connection size: %d)" %
                                         (pin1.pinName, pin2.pinName, pin1BitWidth, pin2ConnectionWidth))
                 self.paramMappingList.append(H2VParamMappingItem(0, pin1BitWidth - 1, pin1BitWidth, paramFullName))
 
