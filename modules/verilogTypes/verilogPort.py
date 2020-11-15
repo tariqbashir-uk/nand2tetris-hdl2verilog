@@ -1,12 +1,11 @@
 from modules.verilogTypes.verilogPortDirectionTypes import VerilogPortDirectionTypes
 
 class VerilogPort():
-    def __init__(self, portName, portDirection, portDataType, portBitStart, portBitEnd, isInternalPort):
+    def __init__(self, portName, portDirection, portDataType, portBitWidth, isInternalPort):
         self.portName       = portName
         self.portDirection  = portDirection #Type: VerilogPortDirectionTypes
         self.portDataType   = portDataType  
-        self.portBitStart   = portBitStart
-        self.portBitEnd     = portBitEnd
+        self.portBitWidth   = portBitWidth
         self.isInternalPort = isInternalPort
         return
 
@@ -15,23 +14,9 @@ class VerilogPort():
         return self.isInternalPort
 
     ##########################################################################
-    def GetPortStr(self, isDefinition=False):
-        portBit = ""
-        if isDefinition:
-            if self.portBitStart != -1:
-                portBit += "[" + str(self.portBitStart - 1)
-            if isDefinition and self.portBitStart != -1:
-                portBit += ":0"
-        else:
-            if self.portBitStart != -1:
-                portBit += "[" + str(self.portBitStart)
-            if self.portBitEnd != -1:
-                portBit += ":" + str(self.portBitEnd)
+    def GetPortStr(self):
+        portStr = ""
 
-        if len(portBit) > 0:
-            portBit += "]"
-
-        if isDefinition:
-            return portBit + " " + self.portName
-        else:
-            return self.portName + portBit
+        if self.portBitWidth > 1:
+            portStr += "[" + str(self.portBitWidth - 1) + ":0] "
+        return portStr + self.portName

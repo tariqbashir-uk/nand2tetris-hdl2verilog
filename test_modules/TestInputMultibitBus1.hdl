@@ -1,0 +1,13 @@
+// TestInputMultibitBus1
+
+CHIP TestInputMultibitBus1 {
+    IN a[8], b[8];
+    OUT out[16];
+
+    PARTS:
+      TestNand16(a[0..7]=a,
+                 a[8..15]=b,
+                 b[0..7]=b,          
+                 b[8..15]=a,          
+                 out=out);
+}

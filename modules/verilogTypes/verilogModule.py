@@ -13,14 +13,14 @@ class VerilogModule():
 
     ##########################################################################
     def AddInputPorts(self, inputs):
-        self.logger.Debug("AddInputPorts: %d" % (len(inputs)))
+        #self.logger.Debug("AddInputPorts: %d" % (len(inputs)))
         for inputPort in inputs:
             self.inputPorts.append(inputPort)
         return
 
     ##########################################################################
     def AddOutputPorts(self, outputs):
-        self.logger.Debug("AddOutputPorts: %d" % (len(outputs)))
+        #self.logger.Debug("AddOutputPorts: %d" % (len(outputs)))
         for outputPort in outputs:
             self.outputPorts.append(outputPort)
         return
@@ -29,14 +29,6 @@ class VerilogModule():
     def AddSubmoduleCalls(self, submoduleCalls):
         self.submoduleCalls = submoduleCalls
         return
-
-    ##########################################################################
-    def GetInputNameList(self):
-        return [str(x.portName) for x in self.inputPorts]
-
-    ##########################################################################
-    def GetOutputNameList(self):
-        return [str(x.portName) for x in self.outputPorts]
 
     ##########################################################################
     def GetInputPortList(self):
@@ -68,8 +60,8 @@ class VerilogModule():
     def DumpModuleDetails(self):
         self.logger.Info("***** START: %s Verilog Module *****" % (self.moduleName))
         self.logger.Info("Interface:")
-        self.logger.Info("  Inputs:  %s" % (', '.join(self.GetInputNameList())))
-        self.logger.Info("  Outputs: %s" % (', '.join(self.GetOutputNameList())))
+        self.logger.Info("  Inputs:  %s" % (', '.join([str(x.GetPortStr()) for x in self.inputPorts])))
+        self.logger.Info("  Outputs: %s" % (', '.join([str(x.GetPortStr()) for x in self.outputPorts])))
 
         self.logger.Info("Implementation:")
         for submoduleCall in self.GetSubmoduleCalls():

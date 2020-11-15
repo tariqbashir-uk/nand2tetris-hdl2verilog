@@ -20,21 +20,31 @@ class HdlChip():
 
     ##########################################################################
     def AddInputPins(self, inputs):
-        self.logger.Debug("AddInputPins: %d" % (len(inputs)))
+        #self.logger.Debug("AddInputPins: %d" % (len(inputs)))
         for inputPin in inputs:
-            self.inputPins.append(HdlPin(inputPin.pinName, pinType=HdlPinTypes.Input, bitWidth=inputPin.bitWidth))
+            bitWidthString = "[1]"
+            if inputPin.bitWidthString:
+                bitWidthString = inputPin.bitWidthString
+            self.inputPins.append(HdlPin(inputPin.pinName, 
+                                         pinType=HdlPinTypes.Input, 
+                                         bitWidthString=bitWidthString))
         return
 
     ##########################################################################
     def AddOutputPins(self, outputs):
-        self.logger.Debug("AddOutputPins: %d" % (len(outputs)))
+        #self.logger.Debug("AddOutputPins: %d" % (len(outputs)))
         for outputPin in outputs:
-            self.outputPins.append(HdlPin(outputPin.pinName, pinType=HdlPinTypes.Output, bitWidth=outputPin.bitWidth))
+            bitWidthString = "[1]"
+            if outputPin.bitWidthString:
+                bitWidthString = outputPin.bitWidthString
+            self.outputPins.append(HdlPin(outputPin.pinName, 
+                                          pinType=HdlPinTypes.Output, 
+                                          bitWidthString=bitWidthString))
         return
 
     ##########################################################################
     def AddPart(self, chipPart):
-        self.logger.Debug("AddPart: %s" % (chipPart.partName))
+        #self.logger.Debug("AddPart: %s" % (chipPart.partName))
         chipPart.SetPinTypes(self.inputPins, self.outputPins)
         self.partList.append(chipPart)
         return
@@ -44,7 +54,7 @@ class HdlChip():
         for part in self.partList:
             for connection in part.connections: # type: HdlConnection
                 if connection.pin2.pinName == pinName:
-                    if not connection.pin2.bitWidth and bitWidth:
+                    if connection.pin2.bitWidth != bitWidth:
                         self.logger.Debug("Updating chip %s, line %d, part %s: Pin2 \"%s\" width changed from %s to %s" % 
                                             (self.chipName, part.lineNo, part.partName, connection.pin2.pinName, connection.pin2.bitWidth, bitWidth))
                         connection.pin2.bitWidth = bitWidth   
@@ -55,7 +65,7 @@ class HdlChip():
         for part in self.partList:
             for connection in part.connections: # type: HdlConnection
                 if connection.pin1.pinName == pinName and part.partName == partName:
-                    if not connection.pin1.bitWidth and bitWidth:
+                    if connection.pin1.bitWidth != bitWidth:
                         self.logger.Debug("Updating chip %s, line %d, part %s: Pin1 \"%s\" width changed from %s to %s (from %s)" % 
                                             (self.chipName, part.lineNo, part.partName, connection.pin1.pinName, connection.pin1.bitWidth, bitWidth, partName))
                         connection.pin1.bitWidth = bitWidth
@@ -127,22 +137,14 @@ class HdlChip():
         return self.partList
 
     ##########################################################################
-    def _GetInputNameList(self):
-        return [str(x.GetPortStr(isDefinition=True)) for x in self.inputPins]
-
-    ##########################################################################
-    def _GetOutputNameList(self):
-        return [str(x.GetPortStr(isDefinition=True)) for x in self.outputPins]
-
-    ##########################################################################
     def DumpChipDetails(self):
-        self.logger.Debug("***** START: %s HDL Chip *****" % (self.chipName))
+        self.logger.Debug("*************** START: %s HDL Chip ***************" % (self.chipName))
         self.logger.Debug("Interface:")
-        self.logger.Debug("  Inputs:  %s" % (', '.join(self._GetInputNameList())))
-        self.logger.Debug("  Outputs: %s" % (', '.join(self._GetOutputNameList())))
+        self.logger.Debug("  Inputs:  %s" % (', '.join([str(x.GetPinStr()) for x in self.inputPins])))
+        self.logger.Debug("  Outputs: %s" % (', '.join([str(x.GetPinStr()) for x in self.outputPins])))
 
         self.logger.Debug("Implementation:")
         for part in self.partList:
             self.logger.Debug("  Part %s (line %d): %s" % (part.partName, part.lineNo, part.GetConnectionStr()))
-        self.logger.Debug("***** END: %s HDL Chip *****" % (self.chipName))
-        return    
+        self.logger.Debug("*************** END: %s HDL Chip ***************" % (self.chipName))
+        return

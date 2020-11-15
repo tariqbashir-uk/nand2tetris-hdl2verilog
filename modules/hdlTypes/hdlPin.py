@@ -1,10 +1,19 @@
 from modules.hdlTypes.hdlPinTypes import HdlPinTypes
 
+import modules.commonDefs as commonDefs
+
 class HdlPin():
-    def __init__(self, pinName, pinType=HdlPinTypes.Unknown, bitWidth="1"):
-        self.pinName  = pinName
-        self.pinType  = pinType  #Type: HdlPinTypes
-        self.bitWidth = bitWidth
+    def __init__(self, pinName, pinType=HdlPinTypes.Unknown, bitWidthString=None):
+        self.pinName        = pinName
+        self.pinType        = pinType  # type: HdlPinTypes
+        self.bitWidthString = bitWidthString
+        self.bitWidth       = commonDefs.NO_BIT_VALUE
+        self.startBitOfBus  = commonDefs.NO_BIT_VALUE
+        self.endBitOfBus    = commonDefs.NO_BIT_VALUE
+
+        bitWidthStr = self.GetPinBitWidthString()
+        if bitWidthStr and not ".." in bitWidthStr:
+            self.bitWidth = int(bitWidthStr)
         return
 
     ##########################################################################
@@ -16,35 +25,20 @@ class HdlPin():
         return True if self.pinType == HdlPinTypes.Internal else False
 
     ##########################################################################
-    def GetPinBitRange(self):
-        bitStart = -1
-        bitEnd   = -1
-        
-        if self.bitWidth:
-            bitWidth = self.bitWidth.replace("[", "").replace("]", "")
-            if ".." in bitWidth:
-                b = bitWidth.split("..")
-                bitStart = int(b[1])
-                bitEnd   = int(b[0])
-            else:
-                bitStart = int(bitWidth)
+    def GetPinStr(self):
+        pinStr = self.pinName
 
-        return bitStart, bitEnd
+        if self.bitWidth > 1:
+            pinStr += "[" + str(self.bitWidth) + "]"
+        return pinStr
 
     ##########################################################################
-    def GetPortStr(self, isDefinition=False):
-        bitStart, bitEnd = self.GetPinBitRange()
-        pinBit = ""
-        if isDefinition:
-            if bitStart != -1:
-                pinBit += "[" + str(bitStart)
+    def GetPinBitWidth(self):
+        return self.bitWidth
+
+    ##########################################################################
+    def GetPinBitWidthString(self):
+        if self.bitWidthString:
+            return self.bitWidthString.replace("[", "").replace("]", "")
         else:
-            if bitStart != -1:
-                pinBit += "[" + str(bitStart)
-            if bitEnd != -1:
-                pinBit += ".." + str(bitEnd)
-
-        if len(pinBit) > 0:
-            pinBit += "]"
-
-        return self.pinName + pinBit
+            return None

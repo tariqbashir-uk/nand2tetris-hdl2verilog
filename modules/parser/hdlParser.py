@@ -151,7 +151,10 @@ class HdlParser:
         if len(p) > 2:
             pinBitWidth = p[2]
 
-        p[0] = HdlPin(pinName, bitWidth=pinBitWidth)
+        if pinBitWidth:
+            p[0] = HdlPin(pinName, bitWidthString=pinBitWidth)
+        else:
+            p[0] = HdlPin(pinName)
         return
 
     def p_pinlist(self, p):

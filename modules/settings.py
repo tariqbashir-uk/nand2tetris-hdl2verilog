@@ -1,5 +1,4 @@
-# Common constants for all modules.
-# Note: Individual constants defined in modules
+# Common settings constants for all modules.
 
 VERSION_NUMBER            = "0.0.1"
 LOGFILE_NAME              = "log_output.txt"

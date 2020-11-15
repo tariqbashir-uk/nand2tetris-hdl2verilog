@@ -73,6 +73,12 @@ class FileActions:
         return os.path.splitext(fileName)  
 
     ##########################################################################
+    # GetAbsoluteFilename
+    ##########################################################################
+    def GetAbsoluteFilename(self, relativeFilename):
+        return os.path.abspath(relativeFilename)
+
+    ##########################################################################
     # CreateFolderIfNeeded
     ##########################################################################
     def CreateFolderIfNeeded(self, folder):

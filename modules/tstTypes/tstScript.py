@@ -20,9 +20,13 @@ class TstScript():
         return
 
     ##########################################################################
-    def SetOutputFormat(self, outputFormatList):
+    def SetOutputFormatList(self, outputFormatList):
         self.outputFormatList = outputFormatList
         return
+
+    ##########################################################################
+    def GetOutputFormatList(self):
+        return self.outputFormatList
 
     ##########################################################################
     def DumpTestDetails(self):

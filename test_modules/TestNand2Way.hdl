@@ -1,0 +1,9 @@
+CHIP TestNand2Way {
+    IN a[2], b[2];
+    OUT out;
+
+    PARTS:
+      Nand(a=a[0], b=b[0], out=temp);
+      Nand(a=a[1], b=temp, out=out);
+      
+}

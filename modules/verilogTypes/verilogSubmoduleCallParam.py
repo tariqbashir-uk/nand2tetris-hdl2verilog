@@ -1,43 +1,29 @@
 from modules.verilogTypes.verilogPort import VerilogPort
 
+import modules.commonDefs as commonDefs
+
 class VerilogSubmoduleCallParam():
-    def __init__(self, portName, internalParamPort : VerilogPort, isCallPortOutput, isModuleAndParamWidthSame):
-        self.portName          = portName
-        self.internalParamPort = internalParamPort
-        self.bitCount          = 1
-        self.isCallPortOutput  = isCallPortOutput
-        self.isModuleAndParamWidthSame = isModuleAndParamWidthSame
+    def __init__(self, toPort : VerilogPort, fromPort : VerilogPort, paramList):
+        self.toPort    = toPort
+        self.fromPort  = fromPort
+        self.paramList = paramList
         return
 
     ##########################################################################
-    def IsCallPortOutput(self):
-        return self.isCallPortOutput
-
-    ##########################################################################
-    def IncrementBitCount(self):
-        self.bitCount += 1
-        return
+    def IsFromPortInternal(self):
+        return True if self.fromPort and self.fromPort.IsInternal() else False
 
     ##########################################################################
     def GetParamNameForCall(self):
-        paramName     = ""
-        paramNameList = [self.internalParamPort for i in range(self.bitCount)]
+        paramName = ""
 
-        if self.bitCount == 1:
-            if self.isModuleAndParamWidthSame:
-                paramName = self.internalParamPort.portName
-            else:
-                paramName = self.internalParamPort.GetPortStr()
-        else:
-            paramName += "{" 
-            if self.isModuleAndParamWidthSame:
-                paramName += ', '.join([x.portName for x in paramNameList])
-            else:
-                paramName += ', '.join([x.GetPortStr() for x in paramNameList])
-            paramName += "}" 
-
+        if len(self.paramList) > 1:  
+            paramName += "{"
+        paramName += ', '.join(x for x in self.paramList)
+        if len(self.paramList) > 1:  
+            paramName += "}"
         return paramName
 
     ##########################################################################
     def GetCallStr(self):
-        return self.portName + " : " + self.internalParamPort.GetPortStr()
+        return self.fromPort.portName
