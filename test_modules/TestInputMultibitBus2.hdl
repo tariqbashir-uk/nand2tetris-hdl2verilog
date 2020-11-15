@@ -6,9 +6,9 @@ CHIP TestInputMultibitBus2 {
 
     PARTS:
       TestNand16(a[0]=true,
+                 a[15]=false,
                  a[1..7]=a[0..6],
                  a[8..14]=a[9..15],
-                 a[15]=true,
                  b=true,         
                  out=out);
 }

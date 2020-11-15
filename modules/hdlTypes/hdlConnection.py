@@ -20,8 +20,10 @@ class HdlConnection():
         self.pin2BitIndex, self.pin2StartBitOfBus, self.pin2EndBitOfBus, self.pin2ConnectionWidth, self.pin2ConnectionType = (
             self._SetInitialPinBitParams(self.pin2))
 
-        # Update connection width for a connection with an output pin
-        if not self.IsConnectionToInput() and self.pin2.IsInternal():
+        # Following cases we know the pin2ConnectionWidth = pin1ConnectionWidth
+        if ((not self.IsConnectionToInput() and self.pin2.IsInternal()) or
+            self.pin1ConnectionType.SingleBit or
+            self.pin1ConnectionType.BitRange):
             self.pin2ConnectionWidth = self.pin1ConnectionWidth
         return
 

@@ -14,6 +14,7 @@ class H2VParamMappingItem:
         self.verilogParam = verilogParam
         self.vStartBit    = self._HdlBitNumberToVerilog(hdlStartBit, numberOfBits)
         self.vEndBit      = self._HdlBitNumberToVerilog(hdlEndBit, numberOfBits)
+
         return
 
     ##########################################################################
@@ -26,7 +27,7 @@ class H2VParamMappingItem:
 
     ##########################################################################
     def DebugInfo(self):
-        print("%d to %d: %s" % (self.hdlStartBit, self.hdlEndBit, self.verilogParam))
+        print("%d -> %d (%d -> %d): %d bits (%s), bits mapped = %d" % (hdlStartBit, hdlEndBit, self.vStartBit, self.vEndBit, numberOfBits, verilogParam, self.GetNumBits()))
         return
 
 class HdlToVerilogParamMapper():
@@ -56,7 +57,6 @@ class HdlToVerilogParamMapper():
             
             # Note: Cases todo..
             # all bits   <-- input all bits (different bit length)
-            # bit range  <-- input bit range
 
             pin1BitIndex, pin1StartBitOfBus, pin1EndBitOfBus, pin1ConnectionWidth, pin1ConnectionType = connection.GetPin1Params()
             pin2BitIndex, pin2StartBitOfBus, pin2EndBitOfBus, pin2ConnectionWidth, pin2ConnectionType = connection.GetPin2Params()
@@ -65,6 +65,7 @@ class HdlToVerilogParamMapper():
                                                     pin2BitIndex,
                                                     pin2StartBitOfBus,
                                                     pin2EndBitOfBus,
+                                                    pin2ConnectionWidth,
                                                     True if pin1.pinType == HdlPinTypes.Input else False)
 
             # Cases:
@@ -88,7 +89,14 @@ class HdlToVerilogParamMapper():
             # Cases:
             # bit range  <-- input all bits
             # bit range  <-- internal all bits
-            elif pin1ConnectionType == HdlConnectionTypes.BitRange and pin2ConnectionType == HdlConnectionTypes.AllBits:
+            elif (pin1ConnectionType == HdlConnectionTypes.BitRange and 
+                  pin2ConnectionType == HdlConnectionTypes.AllBits):
+                self.paramMappingList.append(H2VParamMappingItem(pin1StartBitOfBus, pin1EndBitOfBus, pin1BitWidth, paramFullName))
+
+            # Cases:
+            # bit range  <-- input bit range
+            elif (pin1ConnectionType == HdlConnectionTypes.BitRange and 
+                  pin2ConnectionType == HdlConnectionTypes.BitRange):
                 self.paramMappingList.append(H2VParamMappingItem(pin1StartBitOfBus, pin1EndBitOfBus, pin1BitWidth, paramFullName))
 
             # Cases:
@@ -103,7 +111,8 @@ class HdlToVerilogParamMapper():
             self.logger.Debug("Not enough bits mapped: %s to %s: Bit Width: %d, Mapped Bits: %d. Will add padding." % 
                                (pin1.pinName, pin2.pinName, pin1BitWidth, numMappedBits))
         
-            self._PadMissingBits(pin1BitWidth, 
+            self._PadMissingBits(pin1.pinName, pin2.pinName,
+                                 pin1BitWidth, 
                                  self.paramMappingList, 
                                  True if pin1.pinType == HdlPinTypes.Output else False)
 
@@ -118,7 +127,7 @@ class HdlToVerilogParamMapper():
         return self.paramList
 
     ##########################################################################
-    def _PadMissingBits(self, pinBitWidth, paramMappingList, isOutputPin):
+    def _PadMissingBits(self, pin1Name, pin2Name, pinBitWidth, paramMappingList, isOutputPin):
         bitMapList = [0] * pinBitWidth
 
         for item in paramMappingList:
@@ -146,7 +155,7 @@ class HdlToVerilogParamMapper():
                 width = pinBitWidth - startPos
                 paramMappingList.append(H2VParamMappingItem(startPos, pinBitWidth - 1, pinBitWidth, str(width) + "'b0"))
 
-        #print(bitMapList)
+        #print("%s --> %s: %s" % (pin1Name, pin2Name, bitMapList))
         return
 
     ##########################################################################
@@ -157,17 +166,17 @@ class HdlToVerilogParamMapper():
         return totalBits
     
     ##########################################################################
-    def _MakeParamFullName(self, pinName, pinBitIndex, pinStartBitOfBus, pinEndBitOfBus, isInputPin):
+    def _MakeParamFullName(self, pinName, pinBitIndex, pinStartBitOfBus, pinEndBitOfBus, pinConnectionWidth, isInputPin):
         paramName  = pinName
         paramExtra = ""
 
         # If the pin is an Input then swap false to 1'b0
         if isInputPin and pinName == 'false':
-            paramName = "1'b0"
+            paramName = ("%d'b%s" % (pinConnectionWidth, '0'.join(['0' * pinConnectionWidth])))
 
         # If the pin is an Input then swap true to 1'b1
         if isInputPin and pinName == 'true':
-            paramName = "1'b1"
+            paramName = ("%d'b%s" % (pinConnectionWidth, '1'.join(['1' * pinConnectionWidth])))
 
         if pinBitIndex != commonDefs.NO_BIT_VALUE:
             paramExtra += "[" + str(pinBitIndex) + "]"

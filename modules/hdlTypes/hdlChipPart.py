@@ -35,7 +35,7 @@ class HdlChipPart():
                     pinFound = True
                     break
 
-            if pinFound == False:
+            if pinFound == False and (connection.pin2.pinName != 'false' and connection.pin2.pinName != 'true'):
                 connection.pin2.pinType = HdlPinTypes.Internal
         return
 
