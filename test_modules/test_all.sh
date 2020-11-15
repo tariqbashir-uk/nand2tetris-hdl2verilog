@@ -17,6 +17,7 @@ cd ..
 python3 ./hdl2verilog.py -i ./test_modules -o ./tmp_generated
 
 cd tmp_generated
+mkdir out
 chmod +x ./runme.sh
 
 echo "############# Running generated tests #############"

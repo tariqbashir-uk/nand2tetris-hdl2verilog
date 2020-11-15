@@ -31,39 +31,33 @@ class HdlChipList():
         return result
 
     ##########################################################################
-    def UpdateAllPin1BitWidths(self):
+    def UpdateAllPinBitWidths(self):
+        self.logger.Info("Started: UpdateAllPinBitWidths")
         for hdlChip in self.chipList:
             for part in hdlChip.partList: # type: HdlChipPart
                 for connection in part.connections: # type: HdlConnection
-                    pin      = self.GetPin(part.partName, connection.pin1.pinName) # type: HdlPin
-                    bitWidth = self.GetBitWidthForPin(part.partName, pin.pinName)
-                    hdlChip.UpdatePin1Width(part.partName, pin.pinName, bitWidth)
-                    hdlChip.UpdatePin1Type(pin.pinName, pin.pinType)
+                    pin1, pin2  = connection.GetPins()
+                    pinFromChip = self.GetPinFromChip(part.partName, pin1.pinName) # type: HdlPin                    
+                    hdlChip.UpdatePin1Width(part.partName, pin1.pinName, pinFromChip.GetPinBitWidth())
+                    hdlChip.UpdatePin1Type(pin1.pinName, pinFromChip.pinType)
+                    hdlChip.UpdatePin2Width(pin2.pinName, pinFromChip.GetPinBitWidth())                        
 
-        return
-
-    ##########################################################################
-    def UpdateAllPin2BitWidths(self):
-        for hdlChip in self.chipList:
-            for part in hdlChip.partList: # type: HdlChipPart
-                for connection in part.connections: # type: HdlConnection
-                    pin1, pin2 = connection.GetPins()
-                    if pin1.pinType == HdlPinTypes.Output and pin2.pinType == HdlPinTypes.Internal:
-                        pin      = self.GetPin(part.partName, connection.pin1.pinName) # type: HdlPin
-                        bitWidth = self.GetBitWidthForPin(part.partName, pin.pinName)
-                        hdlChip.UpdatePin2Width(pin.pinName, bitWidth)
+        self.logger.Info("Completed: UpdateAllPinBitWidths")
         return
 
     ##########################################################################
     def UpdateAllPartConnections(self):
+        self.logger.Info("Started: UpdateAllPartConnections")
         for hdlChip in self.chipList:
             for part in hdlChip.partList: # type: HdlChipPart
                 for connection in part.connections: # type: HdlConnection
                     connection.UpdateConnectionBitWidths()
+        
+        self.logger.Info("Completed: UpdateAllPartConnections")
         return
 
     ##########################################################################
-    def GetPin(self, chipName, pinName):
+    def GetPinFromChip(self, chipName, pinName):
         pin     = None
         hdlChip = self.GetChip(chipName)
 
