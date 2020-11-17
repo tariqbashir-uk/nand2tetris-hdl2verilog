@@ -8,6 +8,8 @@ from modules.core.textFile import TextFile
 from modules.fileHandlers.tstFile import TstFile
 from modules.fileHandlers.hdlFile import HdlFile
 from modules.hdlTypes.hdlChipList import HdlChipList
+from modules.verilogTypes.verilogNandModule import VerilogNandModule
+from modules.verilogTypes.verilogDFFModule import VerilogDFFModule
 from modules.mappers.hdlToVerilogMapper import HdlToVerilogMapper
 
 import modules.settings as settings
@@ -79,19 +81,9 @@ class Hdl2verilogMain():
 
         runSHFile.WriteFile(runContents)
 
-        self.WriteNandV(outputFolder)
+        VerilogNandModule.WriteModule(outputFolder)
+        VerilogDFFModule.WriteModule(outputFolder)
         return    
-
-    ##########################################################################
-    def WriteNandV(self, outputFolder):
-        nand_v  = TextFile(join(outputFolder, 'Nand.v'))
-        nandContents  = "module Nand(out, a, b);\n"
-        nandContents += "  input a, b;\n"
-        nandContents += "  output out;\n"
-        nandContents += "  nand (out, a, b);\n"
-        nandContents += "endmodule\n"
-        nand_v.WriteFile(nandContents)
-        return
 
     ##########################################################################
     def _GetFilesWithExtInFolder(self, folder, ext):
