@@ -1,5 +1,6 @@
 from modules.core.logger import Logger
 from modules.hdlTypes.hdlNandChip import HdlNandChip
+from modules.hdlTypes.hdlDFFChip import HdlDFFChip
 from modules.hdlTypes.hdlChip import HdlChip
 from modules.hdlTypes.hdlPin import HdlPin
 from modules.hdlTypes.hdlPinTypes import HdlPinTypes
@@ -27,6 +28,9 @@ class HdlChipList():
 
         if not result and chipName == 'Nand':
             result = HdlNandChip.GetChip()
+
+        if not result and chipName == 'DFF':
+            result = HdlDFFChip.GetChip()
 
         return result
 
