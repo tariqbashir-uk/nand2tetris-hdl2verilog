@@ -8,12 +8,22 @@ class VerilogDFFModule():
     @staticmethod
     ##########################################################################
     def WriteModule(outputFolder):
-        nand_v  = TextFile(join(outputFolder, 'DFF.v'))
-        nandContents  = "module DFF(in, out);\n"
-        nandContents += "  input in;\n"
-        nandContents += "  output out;\n"
-        nandContents += "  assign in=out;\n"
-        nandContents += "endmodule\n"
-        nand_v.WriteFile(nandContents)
+        dff_v  = TextFile(join(outputFolder, 'DFF.v'))
+        dffContents  = "module DFF(in, out);\n"
+        dffContents += "  input in;\n"
+        dffContents += "  output out;\n"
+        dffContents += "  assign in=out;\n"
+        dffContents += "endmodule\n"
+
+        # module DFF(in, clk, out);
+        #   input in;   // Data input 
+        #   input clk;  // clock input 
+        #   output out; // output Q 
+        #   always @(posedge clk) 
+        #   begin
+        #     out <= in; 
+        #   end 
+        # endmodule         
+        dff_v.WriteFile(dffContents)
         return
 
