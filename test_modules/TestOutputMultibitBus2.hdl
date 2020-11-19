@@ -1,0 +1,21 @@
+// TestOutputMultibitBus2
+
+CHIP TestOutputMultibitBus2 {
+    IN a, b;
+    OUT out1, out2[2], out3[2], out4[3];
+
+    PARTS:
+      TestNand2(a[0]=a,
+                a[1]=a,
+                b[0]=b,
+                b[1]=b,
+                out[0]=out1,
+                out[0..1]=out2);
+
+      TestNand2(a[0]=a,
+                a[1]=a,
+                b[0]=b,
+                b[1]=b,
+                out=out3,
+                out[0..1]=out4[1..2]);
+}
