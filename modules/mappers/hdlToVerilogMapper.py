@@ -100,7 +100,7 @@ class HdlToVerilogMapper():
 
                 keyName = pin1.pinName
                 if keyName not in paramMapperDict:
-                    paramMapperDict[keyName] = HdlToVerilogParamMapper(toPort, fromPort)         
+                    paramMapperDict[keyName] = HdlToVerilogParamMapper(hdlChip.chipName, part.partName, part.lineNo, toPort, fromPort)         
                 
                 paramMapperDict[keyName].AddHdlConnection(connection)
 

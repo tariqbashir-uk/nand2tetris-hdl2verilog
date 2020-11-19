@@ -12,9 +12,9 @@ class H2VParamMappingItem:
         self.hdlStartBit  = hdlStartBit 
         self.hdlEndBit    = hdlEndBit
         self.verilogParam = verilogParam
+        self.numberOfBits = numberOfBits
         self.vStartBit    = self._HdlBitNumberToVerilog(hdlStartBit, numberOfBits)
         self.vEndBit      = self._HdlBitNumberToVerilog(hdlEndBit, numberOfBits)
-
         return
 
     ##########################################################################
@@ -26,12 +26,21 @@ class H2VParamMappingItem:
         return numberOfBits - hdlBitNumber - 1
 
     ##########################################################################
-    def DebugInfo(self):
-        print("%d -> %d (%d -> %d): %d bits (%s), bits mapped = %d" % (hdlStartBit, hdlEndBit, self.vStartBit, self.vEndBit, numberOfBits, verilogParam, self.GetNumBits()))
-        return
+    def GetDebugInfo(self):
+        return ("Mapped: %d -> %d (%d -> %d): %d bits (%s), bits mapped = %d" % 
+                   (self.hdlStartBit,
+                    self.hdlEndBit,
+                    self.vStartBit,
+                    self.vEndBit,
+                    self.numberOfBits,
+                    self.verilogParam,
+                    self.GetNumBits()))
 
 class HdlToVerilogParamMapper():
-    def __init__(self, toPort : VerilogPort, fromPort : VerilogPort):
+    def __init__(self, chipName, partName, lineNo, toPort : VerilogPort, fromPort : VerilogPort):
+        self.chipName       = chipName
+        self.partName       = partName 
+        self.lineNo         = lineNo
         self.toPort         = toPort
         self.fromPort       = fromPort
         self.logger         = Logger()
@@ -51,10 +60,12 @@ class HdlToVerilogParamMapper():
 
         self.paramMappingList = []
 
-        #print("%s: %d, expecting: %d" % (pin1.pinName, pin1BitWidth, len(self.hdlConnections)))
+        self.logger.Info("Start: Chip: %s, part: %s (line %d), pin: %s" % (self.chipName, self.partName, self.lineNo, pin1.pinName))
         for connection in self.hdlConnections:
             pin1, pin2 = connection.GetPins() # type: HdlPin, HdlPin
-            
+
+            self.logger.Info("Mapping: %s" % (connection.GetPinStr()))
+
             # Note: Cases todo..
             # all bits   <-- input all bits (different bit length)
 
@@ -105,9 +116,9 @@ class HdlToVerilogParamMapper():
             # single bit <-- internal all bits
             else:
                 self.paramMappingList.append(H2VParamMappingItem(connection.pin1BitIndex, connection.pin1BitIndex, pin1BitWidth, paramFullName))
-            
+
         numMappedBits = self._CountMappedBits(self.paramMappingList)
-        if numMappedBits != pin1BitWidth:
+        if numMappedBits < pin1BitWidth:
             self.logger.Debug("Not enough bits mapped: %s to %s: Bit Width: %d, Mapped Bits: %d. Will add padding." % 
                                (pin1.pinName, pin2.pinName, pin1BitWidth, numMappedBits))
         
@@ -115,16 +126,34 @@ class HdlToVerilogParamMapper():
                                  pin1BitWidth, 
                                  self.paramMappingList, 
                                  True if pin1.pinType == HdlPinTypes.Output else False)
+        
+        # We can duplicate outputs in HDL mode calls, which isn't support in verilog. Therefore to map this case to verilog
+        # we will have to assign the output pin to a new internal parameter and the use assign calls to set the correct ports.
+        # e.g.
+        # HDL:      Nand(a=a, b=b, out=out1, out=out2)
+        # would map to..
+        # Verilog:  Nand nand_1(.a (a), .b(b), .out(outTemp))
+        #           assign out1<=outTemp
+        #           assign out2<=outTemp
+        elif numMappedBits > pin1BitWidth and pin1.pinType == HdlPinTypes.Output:
+            self.logger.Debug("Too many bits mapped: %s to %s: Bit Width: %d, Mapped Bits: %d. Will split into multiple output vars." % 
+                               (pin1.pinName, pin2.pinName, pin1BitWidth, numMappedBits))
 
         newlist = sorted(self.paramMappingList, key=lambda x: x.vStartBit)
         for item in newlist:
             self.paramList.append(item.verilogParam)
-        #     item.DebugInfo()
+
+        self.logger.Info("End: Mapping chip: %s, part:%s (line %d), pin: %s" % (self.chipName, self.partName, self.lineNo, pin1.pinName))
         return
 
     ##########################################################################
     def GetParamList(self):
         return self.paramList
+
+    ##########################################################################
+    def _SplitMappingIntoVariables(self, pin1Name, pin2Name, pinBitWidth, paramMappingList, isOutputPin):
+        bitMapList = [0] * pinBitWidth
+        return
 
     ##########################################################################
     def _PadMissingBits(self, pin1Name, pin2Name, pinBitWidth, paramMappingList, isOutputPin):
