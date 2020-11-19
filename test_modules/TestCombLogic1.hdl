@@ -1,0 +1,10 @@
+// TestCombLogic1
+
+CHIP TestCombLogic1 {
+    IN a;
+    OUT out;
+
+    PARTS:
+      Nand(a=a, b=dffOut, out=nandOut);
+      DFF(in=nandOut, out=dffOut, out=out);
+}
