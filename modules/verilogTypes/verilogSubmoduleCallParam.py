@@ -1,12 +1,13 @@
 from modules.verilogTypes.verilogPort import VerilogPort
+from modules.verilogTypes.verilogCallParams import VerilogCallParams
 
 import modules.commonDefs as commonDefs
 
 class VerilogSubmoduleCallParam():
-    def __init__(self, toPort : VerilogPort, fromPort : VerilogPort, paramList):
-        self.toPort    = toPort
-        self.fromPort  = fromPort
-        self.paramList = paramList
+    def __init__(self, toPort : VerilogPort, fromPort : VerilogPort, callParamList : VerilogCallParams):
+        self.toPort        = toPort
+        self.fromPort      = fromPort
+        self.callParamList = callParamList
         return
 
     ##########################################################################
@@ -14,15 +15,8 @@ class VerilogSubmoduleCallParam():
         return True if self.fromPort and self.fromPort.IsInternal() else False
 
     ##########################################################################
-    def GetParamNameForCall(self):
-        paramName = ""
-
-        if len(self.paramList) > 1:  
-            paramName += "{"
-        paramName += ', '.join(x for x in self.paramList)
-        if len(self.paramList) > 1:  
-            paramName += "}"
-        return paramName
+    def GetStrForCall(self):
+        return self.callParamList.GetCallStr()
 
     ##########################################################################
     def GetCallStr(self):

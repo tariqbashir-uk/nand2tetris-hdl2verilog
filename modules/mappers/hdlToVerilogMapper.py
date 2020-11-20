@@ -20,6 +20,7 @@ from modules.verilogTypes.verilogModuleTB import VerilogModuleTB
 from modules.verilogTypes.verilogPort import VerilogPort
 from modules.verilogTypes.verilogPortDirectionTypes import VerilogPortDirectionTypes
 from modules.verilogTypes.verilogWireAssignment import VerilogWireAssignment
+from modules.verilogTypes.verilogCallParams import VerilogCallParams
 from modules.verilogTypes.verilogSubmoduleCall import VerilogSubmoduleCall
 from modules.verilogTypes.verilogSubmoduleCallParam import VerilogSubmoduleCallParam
 from modules.generator.verilogModuleGenerator import VerilogModuleGenerator
@@ -86,8 +87,8 @@ class HdlToVerilogMapper():
             portList.append(self._HdlPinToVerilogPort(outputPin, outputPin.GetPinBitWidth()))
         verilogMainModule.AddOutputPorts(portList)
 
-        verilogSubmoduleCalls = []
-        verilogSubmoduleDict  = {}
+        tmpVarCounter        = 0
+        verilogSubmoduleDict = {}
         for part in partList:
             self.logger.Debug("Mapping: Chip %s, Part %s (line %d)" % (hdlChip.chipName, part.partName, part.lineNo))
             connections = part.GetConnections() #type: list[HdlConnection]
@@ -112,7 +113,6 @@ class HdlToVerilogMapper():
 
             verilogSubmoduleCall = VerilogSubmoduleCall(part.partName, verilogSubmoduleDict[part.partName])
 
-            tmpVarCounter = 0
             for paramMapper in paramMapperDict:
                 paramMapperDict[paramMapper].DoMapping()
 
@@ -124,7 +124,7 @@ class HdlToVerilogMapper():
 
                 # Normal case: All parameters can be mapped onto a single input or output port
                 if numParamsForCall == 1:
-                    verilogSubmoduleCallParam = VerilogSubmoduleCallParam(toPort, fromPort, mappedParams.GetVerilogParamList(0))
+                    verilogSubmoduleCallParam = VerilogSubmoduleCallParam(toPort, fromPort, mappedParams.GetVerilogParams(0))
                     verilogSubmoduleCall.AddCallParam(verilogSubmoduleCallParam)
 
                 # Multiple param case:
@@ -142,13 +142,13 @@ class HdlToVerilogMapper():
                     tmpPin     = HdlPin(tmpPinName, HdlPinTypes.Internal, None)
                     tmpPort    = self._HdlPinToVerilogPort(tmpPin, toPort.portBitWidth)
 
-                    verilogSubmoduleCallParam = VerilogSubmoduleCallParam(toPort, tmpPort, [tmpPort.portName])
+                    verilogSubmoduleCallParam = VerilogSubmoduleCallParam(toPort, tmpPort, VerilogCallParams(paramList=[tmpPort.portName]))
                     verilogSubmoduleCall.AddCallParam(verilogSubmoduleCallParam)
                     tmpVarCounter += 1
 
                     for i in range(0, numParamsForCall):
-                        print("%s: %s" % (fromPort.portName, mappedParams.GetVerilogParamList(i)))
-                        verilogMainModule.AddWireAssignment(VerilogWireAssignment(fromPort.portName, mappedParams.GetVerilogParamList(i)))
+                        print("%s: %s" % (fromPort.portName, mappedParams.GetVerilogParams(i)))
+                        verilogMainModule.AddWireAssignment(VerilogWireAssignment(mappedParams.GetVerilogParams(i).GetCallStr(), tmpPinName))
 
             verilogMainModule.AddSubmoduleCall(verilogSubmoduleCall)
 

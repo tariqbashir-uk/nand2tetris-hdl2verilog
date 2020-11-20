@@ -4,6 +4,7 @@ from modules.hdlTypes.hdlConnection import HdlConnection
 from modules.hdlTypes.hdlConnectionTypes import HdlConnectionTypes
 from modules.hdlTypes.hdlPin import HdlPin
 from modules.hdlTypes.hdlPinTypes import HdlPinTypes
+from modules.verilogTypes.verilogCallParams import VerilogCallParams
 
 import modules.commonDefs as commonDefs
 
@@ -39,8 +40,8 @@ class H2VParamMappingItem:
 class H2VParamMappingList:
     def __init__(self):
         self.logger = Logger()
-        self.verilogParamList = []
-        self.paramMappingList = [] #type: list[H2VParamMappingItem]
+        self.verilogCallParams = VerilogCallParams()
+        self.paramMappingList  = [] #type: list[H2VParamMappingItem]
         return
 
     ##########################################################################
@@ -73,12 +74,14 @@ class H2VParamMappingList:
 
         newlist = sorted(self.paramMappingList, key=lambda x: x.vStartBit)
         for item in newlist:
-            self.verilogParamList.append(item.verilogParam)
+            self.verilogCallParams.AddParam(item.verilogParam)
+        #print(len(newlist))
+        #self.verilogCallParams.DumpInfo()
         return
 
     ##########################################################################
-    def GetVerilogParamList(self): 
-        return self.verilogParamList
+    def GetVerilogParams(self): 
+        return self.verilogCallParams
         
     ##########################################################################
     def _PadMissingBits(self, pin1Name, pin2Name, pinBitWidth, paramMappingList, isOutputPin):
@@ -150,8 +153,8 @@ class H2VMappedParamsList:
         return len(self.hdlMappedParamsList)
 
     ##########################################################################
-    def GetVerilogParamList(self, index): 
-        return self.hdlMappedParamsList[index].GetVerilogParamList()
+    def GetVerilogParams(self, index): 
+        return self.hdlMappedParamsList[index].GetVerilogParams()
 
 class HdlToVerilogParamMapper():
     def __init__(self, chipName, partName, lineNo, toPort : VerilogPort, fromPort : VerilogPort):

@@ -49,7 +49,7 @@ class VerilogModuleGenerator:
         for submoduleCall in verilogMainModule.GetSubmoduleCalls(): # type: VerilogSubmoduleCall
             callParamStr = []
             for callParam in submoduleCall.GetCallParams(): # type: VerilogSubmoduleCallParam
-                callParamStr.append(("    .%s (%s)" % (callParam.toPort.portName, callParam.GetParamNameForCall())))
+                callParamStr.append(("    .%s (%s)" % (callParam.toPort.portName, callParam.GetStrForCall())))
 
             verilogText += ("%s %s(\n%s);\n" % (submoduleCall.GetModuleName(), 
                                                 submoduleCall.GetModuleCallName(), 
