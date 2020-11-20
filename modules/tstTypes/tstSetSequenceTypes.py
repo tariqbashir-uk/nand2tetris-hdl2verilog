@@ -1,11 +1,9 @@
 from enum import Enum
 
-class HdlPinTypes(Enum):
-    Input    = 1
-    Output   = 2
-    Internal = 3
-    Clk      = 4
-    Unknown  = 5
+class TstSetSequenceTypes(Enum):
+    eval = 1
+    tick = 2
+    tock = 3
 
     def __str__(self):
         return self.name

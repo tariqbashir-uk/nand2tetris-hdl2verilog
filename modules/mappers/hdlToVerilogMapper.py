@@ -60,10 +60,11 @@ class HdlToVerilogMapper():
         
         for setSequence in tstScript.setSequences: #type: TstSetSequence
             testSequenceV = []
-            for setOperation in setSequence.setOperations: #type: TstSetOperation
-                testSequenceV.append(TstSetOperation(setOperation.pinName, setOperation.pinValue.replace("%B", "'b")))
+            if setSequence.setOperations:
+                for setOperation in setSequence.setOperations: #type: TstSetOperation
+                    testSequenceV.append(TstSetOperation(setOperation.pinName, setOperation.pinValue.replace("%B", "'b")))
 
-            verilogModuleTB.AddTestSequence(TstSetSequence(testSequenceV))
+            verilogModuleTB.AddTestSequence(TstSetSequence(setSequence.sequenceType, testSequenceV))
 
         #verilogModuleTB.DumpModuleDetails()
         verilogModGen.CreateModule(verilogModuleTB)
@@ -147,7 +148,6 @@ class HdlToVerilogMapper():
                     tmpVarCounter += 1
 
                     for i in range(0, numParamsForCall):
-                        print("%s: %s" % (fromPort.portName, mappedParams.GetVerilogParams(i)))
                         verilogMainModule.AddWireAssignment(VerilogWireAssignment(mappedParams.GetVerilogParams(i).GetCallStr(), tmpPinName))
 
             verilogMainModule.AddSubmoduleCall(verilogSubmoduleCall)

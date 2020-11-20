@@ -64,6 +64,10 @@ class VerilogModuleTB():
         return self.outputFormatList
 
     ##########################################################################
+    def GetOutputParamList(self):
+        return [x for x in self.outputFormatList if x != "time"]
+
+    ##########################################################################
     def DumpModuleDetails(self):
         self.logger.Info("***** START: %s Verilog TestBench Module *****" % (self.moduleName))
         self.logger.Info("Interface:")
@@ -74,8 +78,9 @@ class VerilogModuleTB():
         self.logger.Info("Test Steps:")
         for setSequence in self.testSequences: #Type: TstSetSequence
             self.logger.Info("  Test Step: %d" % (sequenceNumber))
-            for setOperation in setSequence.setOperations: #Type: TstSetOperation
-                self.logger.Info("    Operation: %s = %s" % (setOperation.pinName, setOperation.pinValue))
+            if setSequence.setOperations:
+                for setOperation in setSequence.setOperations: #Type: TstSetOperation
+                    self.logger.Info("    Operation: %s = %s" % (setOperation.pinName, setOperation.pinValue))
             sequenceNumber += 1
         self.logger.Info("***** END: %s Verilog TestBench Module *****" % (self.moduleName))
         return    

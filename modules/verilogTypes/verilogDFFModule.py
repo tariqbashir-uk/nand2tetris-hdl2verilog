@@ -9,21 +9,21 @@ class VerilogDFFModule():
     ##########################################################################
     def WriteModule(outputFolder):
         dff_v  = TextFile(join(outputFolder, 'DFF.v'))
-        dffContents  = "module DFF(in, out);\n"
-        dffContents += "  input in;\n"
-        dffContents += "  output out;\n"
-        dffContents += "  assign in=out;\n"
-        dffContents += "endmodule\n"
 
-        # module DFF(in, clk, out);
-        #   input in;   // Data input 
-        #   input clk;  // clock input 
-        #   output out; // output Q 
-        #   always @(posedge clk) 
-        #   begin
-        #     out <= in; 
-        #   end 
-        # endmodule         
+        dffContents  = "module DFF(in, clk, out);\n"
+        dffContents += "input in;   // Data input\n"
+        dffContents += "input clk;  // clock input\n" 
+        dffContents += "output out; // output Q\n"
+        dffContents += "\n"
+        dffContents += "initial begin\n"
+        dffContents += "  out=0;\n"
+        dffContents += "end\n"
+        dffContents += "\n"
+        dffContents += "always @(posedge clk)\n" 
+        dffContents += "begin\n"
+        dffContents += "  out <= in;\n" 
+        dffContents += "end\n"
+        dffContents += "endmodule\n"        
         dff_v.WriteFile(dffContents)
         return
 

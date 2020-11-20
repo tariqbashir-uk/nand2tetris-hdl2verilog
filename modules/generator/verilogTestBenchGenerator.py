@@ -33,6 +33,7 @@ class VerilogTestBenchGenerator:
         paramNameList.extend([("%s" % (x.portName)) for x in verilogModuleTB.GetOutputPortList()])
 
         outputFormatList = verilogModuleTB.GetOutputFormatList()
+        outputParamList  = verilogModuleTB.GetOutputParamList()
 
         testModuleParams   = []
         testOutputFormat   = []
@@ -67,13 +68,14 @@ class VerilogTestBenchGenerator:
         verilogText += "\n"
         
         for setSequence in verilogModuleTB.testSequences: #Type: TstSetSequence
-            for setOperation in setSequence.setOperations: #Type: TstSetOperation
-                verilogText += ("%s%s = %s;\n" % (" ".rjust(indent), setOperation.pinName, setOperation.pinValue))
+            if setSequence.setOperations:
+                for setOperation in setSequence.setOperations: #Type: TstSetOperation
+                    verilogText += ("%s%s = %s;\n" % (" ".rjust(indent), setOperation.pinName, setOperation.pinValue))
             verilogText += ("%s#period;\n" % (" ".rjust(indent)))
             verilogText += ("%s$fdisplay(write_data, \"| %s |\", %s);\n" % 
                                (" ".rjust(indent), 
                                 ' | '.join([x for x in testOutputFormat]),
-                                ', '.join([x for x in outputFormatList])))
+                                ', '.join([x for x in outputParamList])))
             verilogText += "\n"
 
         verilogText += ("%s#period;\n" % (" ".rjust(indent)))

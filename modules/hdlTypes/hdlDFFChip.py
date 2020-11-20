@@ -12,10 +12,11 @@ class HdlDFFChip():
     @staticmethod
     ##########################################################################
     def GetChip():
-        nandChip = HdlChip()
-        nandChip.SetChipName("DFF")
-        nandChip.AddInputPins([HdlPin("in", HdlPinTypes.Input, "[1]")])
-        nandChip.AddOutputPins([HdlPin("out", HdlPinTypes.Output, "[1]")])
-        #nandChip.DumpChipDetails()
-        return nandChip
+        dffChip = HdlChip()
+        dffChip.SetChipName("DFF")
+        dffChip.AddInputPins([HdlPin("in", HdlPinTypes.Input, "[1]")])
+        dffChip.AddInputPins([HdlPin("clk", HdlPinTypes.Clk, "[1]")])
+        dffChip.AddOutputPins([HdlPin("out", HdlPinTypes.Output, "[1]")])
+        #dffChip.DumpChipDetails()
+        return dffChip
 

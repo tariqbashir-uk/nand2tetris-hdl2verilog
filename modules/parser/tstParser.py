@@ -2,17 +2,18 @@ from modules.core.logger import Logger
 from modules.tstTypes.tstScript import TstScript
 from modules.tstTypes.tstSetSequence import TstSetSequence
 from modules.tstTypes.tstSetOperation import TstSetOperation
+from modules.tstTypes.tstSetSequenceTypes import TstSetSequenceTypes
 
 from ply import lex, yacc
 
 class TstParser:
     reserved = [
-        'set', 'output', 'list', 'eval', 'load', 'compare', 'to', 'file'
+        'set', 'output', 'list', 'eval', 'load', 'compare', 'to', 'file', 'tick', 'tock'
     ]   
     
     tokens = [
         'NAME', 'NUMBER', 'COMMA', 'DOT', 'DASH', 'COMMENT1', 
-        'COMMENT2', 'SEMICOLON', 'PERCENT'
+        'COMMENT2', 'SEMICOLON', 'PERCENT', 'MINUS'
      ] + reserved
 
     #literals = ['%']
@@ -23,6 +24,7 @@ class TstParser:
     t_DASH = r'-'
     t_SEMICOLON = r';'
     t_PERCENT = r'%'
+    t_MINUS = r"-"
 
     def __init__(self):
         self.logger    = Logger()
@@ -112,19 +114,41 @@ class TstParser:
 
     def p_eval_statement(self, p):
         '''eval_statement : eval COMMA'''
+        p[0] = p[1]
+        return
+
+    def p_tock_statement(self, p):
+        '''tock_statement : tock COMMA'''
+        p[0] = p[1]
+        return
+
+    def p_tick_statement(self, p):
+        '''tick_statement : tick COMMA'''
+        p[0] = p[1]
         return
 
     def p_set_sequence(self, p):
         '''set_sequence : set_list eval_statement output SEMICOLON
+                        | set_list tick_statement output SEMICOLON
+                        | set_list tock_statement output SEMICOLON
+                        | tock_statement output SEMICOLON
                         '''
-        self.tstScript.AddSetSequence(TstSetSequence(p[1]))
-        #print("set_sequence: " + str(p[1]))
+        if len(p) == 5:
+            setList      =  p[1]
+            sequenceType = self.GetSequenceType(p[2])
+        else:
+            setList      = None
+            sequenceType = self.GetSequenceType(p[1])
+            
+        self.tstScript.AddSetSequence(TstSetSequence(sequenceType, setList))
+        #print("set_sequence: %s, len = %d" % (sequenceType, len(p)))
         return
 
     def p_set_statement(self, p):
         '''set_statement : set NAME NUMBER COMMA
+                         | set NAME MINUS NUMBER COMMA
                          | set NAME PERCENT NAME COMMA
-                         | set NAME PERCENT NAME SEMICOLON
+                         | set NAME PERCENT NAME SEMICOLON       
                          '''
         pinValue = ""
         pinName  = p[2]
@@ -199,6 +223,14 @@ class TstParser:
 
         self.logger.Error(error_msg)
         return
+
+    ##########################################################################
+    def GetSequenceType(self, typeName):
+        sequenceType = TstSetSequenceTypes.eval
+        for seqType in TstSetSequenceTypes:
+            if typeName.casefold() == str(seqType).casefold():
+                sequenceType = seqType
+        return sequenceType
 
     ##########################################################################
     def Parse(self, fileContent, testName):
