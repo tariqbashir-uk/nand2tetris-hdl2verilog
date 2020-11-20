@@ -19,6 +19,7 @@ from modules.verilogTypes.verilogModule import VerilogModule
 from modules.verilogTypes.verilogModuleTB import VerilogModuleTB
 from modules.verilogTypes.verilogPort import VerilogPort
 from modules.verilogTypes.verilogPortDirectionTypes import VerilogPortDirectionTypes
+from modules.verilogTypes.verilogWireAssignment import VerilogWireAssignment
 from modules.verilogTypes.verilogSubmoduleCall import VerilogSubmoduleCall
 from modules.verilogTypes.verilogSubmoduleCallParam import VerilogSubmoduleCallParam
 from modules.generator.verilogModuleGenerator import VerilogModuleGenerator
@@ -111,20 +112,47 @@ class HdlToVerilogMapper():
 
             verilogSubmoduleCall = VerilogSubmoduleCall(part.partName, verilogSubmoduleDict[part.partName])
 
+            tmpVarCounter = 0
             for paramMapper in paramMapperDict:
                 paramMapperDict[paramMapper].DoMapping()
-                paramList = paramMapperDict[paramMapper].GetParamList()
-                verilogSubmoduleCallParam = VerilogSubmoduleCallParam(paramMapperDict[paramMapper].toPort,
-                                                                      paramMapperDict[paramMapper].fromPort,
-                                                                      paramList)
-                
-                verilogSubmoduleCall.AddCallParam(verilogSubmoduleCallParam)
-            
-            verilogSubmoduleCalls.append(verilogSubmoduleCall)
 
-        verilogMainModule.AddSubmoduleCalls(verilogSubmoduleCalls)
+                toPort       = paramMapperDict[paramMapper].toPort
+                fromPort     = paramMapperDict[paramMapper].fromPort
+                mappedParams = paramMapperDict[paramMapper].GetMappedParams()
+
+                numParamsForCall = mappedParams.GetNumParamsForCall()
+
+                # Normal case: All parameters can be mapped onto a single input or output port
+                if numParamsForCall == 1:
+                    verilogSubmoduleCallParam = VerilogSubmoduleCallParam(toPort, fromPort, mappedParams.GetVerilogParamList(0))
+                    verilogSubmoduleCall.AddCallParam(verilogSubmoduleCallParam)
+
+                # Multiple param case:
+                # We can duplicate outputs in HDL mode calls, which isn't support in verilog. Therefore to map this case to verilog
+                # we will have to assign the output pin to a new internal parameter and the use assign calls to set the correct ports.
+                # e.g.
+                # HDL:      Nand(a=a, b=b, out=out1, out=out2)
+                # would map to..
+                # Verilog:  Nand nand_1(.a (a), .b(b), .out(outTemp))
+                #           assign out1 = outTemp;
+                #           assign out2 = outTemp;
+                else:
+                    # Create the mapping to a new temporary internal parameter, which is the same width as the toPort
+                    tmpPinName = ("tempOutput_%d" % (tmpVarCounter))
+                    tmpPin     = HdlPin(tmpPinName, HdlPinTypes.Internal, None)
+                    tmpPort    = self._HdlPinToVerilogPort(tmpPin, toPort.portBitWidth)
+
+                    verilogSubmoduleCallParam = VerilogSubmoduleCallParam(toPort, tmpPort, [tmpPort.portName])
+                    verilogSubmoduleCall.AddCallParam(verilogSubmoduleCallParam)
+                    tmpVarCounter += 1
+
+                    for i in range(0, numParamsForCall):
+                        print("%s: %s" % (fromPort.portName, mappedParams.GetVerilogParamList(i)))
+                        verilogMainModule.AddWireAssignment(VerilogWireAssignment(fromPort.portName, mappedParams.GetVerilogParamList(i)))
+
+            verilogMainModule.AddSubmoduleCall(verilogSubmoduleCall)
+
         verilogMainModule.DumpModuleDetails()
-        #print(moduleCalls)
         verilogModGen.CreateModule(verilogMainModule)
         return
 

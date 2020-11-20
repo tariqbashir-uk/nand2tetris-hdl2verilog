@@ -4,11 +4,12 @@ from modules.verilogTypes.verilogPortDirectionTypes import VerilogPortDirectionT
 
 class VerilogModule():
     def __init__(self, moduleName):
-        self.logger         = Logger()
-        self.moduleName     = moduleName
-        self.inputPorts     = []
-        self.outputPorts    = []
-        self.submoduleCalls = []
+        self.logger          = Logger()
+        self.moduleName      = moduleName
+        self.inputPorts      = []
+        self.outputPorts     = []
+        self.submoduleCalls  = []
+        self.wireAssignments = []
         return
 
     ##########################################################################
@@ -26,8 +27,13 @@ class VerilogModule():
         return
 
     ##########################################################################
-    def AddSubmoduleCalls(self, submoduleCalls):
-        self.submoduleCalls = submoduleCalls
+    def AddSubmoduleCall(self, submoduleCall):
+        self.submoduleCalls.append(submoduleCall)
+        return
+
+    ##########################################################################
+    def AddWireAssignment(self, wireAssignment):
+        self.wireAssignments.append(wireAssignment)
         return
 
     ##########################################################################
@@ -55,6 +61,10 @@ class VerilogModule():
     ##########################################################################
     def GetSubmoduleCalls(self):
         return self.submoduleCalls
+
+    ##########################################################################
+    def GetWireAssignments(self):
+        return self.wireAssignments
 
     ##########################################################################
     def DumpModuleDetails(self):
