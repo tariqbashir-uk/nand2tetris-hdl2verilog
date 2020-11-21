@@ -14,9 +14,9 @@ class HdlDFFChip():
     def GetChip():
         dffChip = HdlChip()
         dffChip.SetChipName("DFF")
-        dffChip.AddInputPins([HdlPin("in", HdlPinTypes.Input, "[1]")])
-        dffChip.AddInputPins([HdlPin("clk", HdlPinTypes.Clk, "[1]")])
-        dffChip.AddOutputPins([HdlPin("out", HdlPinTypes.Output, "[1]")])
+        dffChip.AddInputPins([HdlPin("in", HdlPinTypes.Input, None)])
+        dffChip.AddInputPins([HdlPin("clk", HdlPinTypes.Clk, None)])
+        dffChip.AddOutputPins([HdlPin("out", HdlPinTypes.Output, None)])
         #dffChip.DumpChipDetails()
         return dffChip
 

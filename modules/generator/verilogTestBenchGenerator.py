@@ -12,6 +12,12 @@ class VerilogTestBenchGenerator:
 
     ##########################################################################
     def CreateModule(self, verilogModuleTB : VerilogModuleTB):
+        clkPortName = verilogModuleTB.GetClkPortName()
+
+        clkInvertStr = ""
+        if clkPortName:
+            clkInvertStr = ("%s = !%s;" % (clkPortName, clkPortName))
+        
         indent = 0
         period = 20
         verilogFile = TextFile(join(self.outputFolder, verilogModuleTB.moduleName + '.v'))
@@ -60,6 +66,8 @@ class VerilogTestBenchGenerator:
         verilogText += ("%sbegin\n" % (" ".rjust(indent)))
 
         indent += settings.DEFAULT_INDENT
+        if clkPortName:
+            verilogText += ("%s%s = 0;\n" % (" ".rjust(indent), clkPortName))
         verilogText += ("%s$dumpfile(\"%s\");\n" % (" ".rjust(indent), verilogModuleTB.dumpFilename))
         verilogText += ("%s$dumpvars(0, %s);\n" % (" ".rjust(indent), verilogModuleTB.moduleName.replace("-", "_")))
         verilogText += ("%swrite_data = $fopen(\"%s\");\n" % (" ".rjust(indent), verilogModuleTB.outFilename))
@@ -71,14 +79,14 @@ class VerilogTestBenchGenerator:
             if setSequence.setOperations:
                 for setOperation in setSequence.setOperations: #Type: TstSetOperation
                     verilogText += ("%s%s = %s;\n" % (" ".rjust(indent), setOperation.pinName, setOperation.pinValue))
-            verilogText += ("%s#period;\n" % (" ".rjust(indent)))
+            verilogText += ("%s#period; %s\n" % (" ".rjust(indent), clkInvertStr))
             verilogText += ("%s$fdisplay(write_data, \"| %s |\", %s);\n" % 
                                (" ".rjust(indent), 
                                 ' | '.join([x for x in testOutputFormat]),
                                 ', '.join([x for x in outputParamList])))
             verilogText += "\n"
 
-        verilogText += ("%s#period;\n" % (" ".rjust(indent)))
+        verilogText += ("%s#period; %s\n" % (" ".rjust(indent), clkInvertStr))
         
         verilogText += "\n"
         verilogText += ("%s$finish;\n" % (" ".rjust(indent)))

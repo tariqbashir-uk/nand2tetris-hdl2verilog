@@ -14,9 +14,9 @@ class HdlNandChip():
     def GetChip():
         nandChip = HdlChip()
         nandChip.SetChipName("Nand")
-        nandChip.AddInputPins([HdlPin("a", HdlPinTypes.Input, "[1]")])
-        nandChip.AddInputPins([HdlPin("b", HdlPinTypes.Input, "[1]")])
-        nandChip.AddOutputPins([HdlPin("out", HdlPinTypes.Output, "[1]")])
+        nandChip.AddInputPins([HdlPin("a", HdlPinTypes.Input, None)])
+        nandChip.AddInputPins([HdlPin("b", HdlPinTypes.Input, None)])
+        nandChip.AddOutputPins([HdlPin("out", HdlPinTypes.Output, None)])
         #nandChip.DumpChipDetails()
         return nandChip
 

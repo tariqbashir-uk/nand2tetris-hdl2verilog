@@ -6,12 +6,13 @@ from modules.tstTypes.tstSetSequence import TstSetSequence
 from modules.tstTypes.tstSetOperation import TstSetOperation
 
 class VerilogModuleTB():
-    def __init__(self, moduleName, testModuleName, dumpFilename, outFilename):
+    def __init__(self, moduleName, testModuleName, dumpFilename, outFilename, clkPortName):
         self.logger         = Logger()
         self.moduleName     = moduleName
         self.testModuleName = testModuleName
         self.dumpFilename   = dumpFilename
         self.outFilename    = outFilename
+        self.clkPortName    = clkPortName
         self.inputPorts     = []
         self.outputPorts    = []
         self.outputFormats  = []
@@ -66,6 +67,10 @@ class VerilogModuleTB():
     ##########################################################################
     def GetOutputParamList(self):
         return [x for x in self.outputFormatList if x != "time"]
+
+    ##########################################################################
+    def GetClkPortName(self):
+        return self.clkPortName
 
     ##########################################################################
     def DumpModuleDetails(self):

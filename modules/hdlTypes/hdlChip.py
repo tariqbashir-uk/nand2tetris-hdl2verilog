@@ -22,11 +22,15 @@ class HdlChip():
     def AddInputPins(self, inputs):
         #self.logger.Debug("AddInputPins: %d" % (len(inputs)))
         for inputPin in inputs:
-            bitWidthString = "[1]"
+            bitWidthString = None
             if inputPin.bitWidthString:
                 bitWidthString = inputPin.bitWidthString
+            
+            pinType = inputPin.pinType
+            if inputPin.pinType == HdlPinTypes.Unknown:
+               pinType = HdlPinTypes.Input
             self.inputPins.append(HdlPin(inputPin.pinName, 
-                                         pinType=HdlPinTypes.Input, 
+                                         pinType=pinType, 
                                          bitWidthString=bitWidthString))
         return
 
@@ -34,7 +38,7 @@ class HdlChip():
     def AddOutputPins(self, outputs):
         #self.logger.Debug("AddOutputPins: %d" % (len(outputs)))
         for outputPin in outputs:
-            bitWidthString = "[1]"
+            bitWidthString = None
             if outputPin.bitWidthString:
                 bitWidthString = outputPin.bitWidthString
             self.outputPins.append(HdlPin(outputPin.pinName, 
@@ -127,6 +131,15 @@ class HdlChip():
     ##########################################################################
     def GetInputPinList(self):
         return self.inputPins
+
+    ##########################################################################
+    def GetClkPin(self):
+        clkPin = None
+        for pin in self.GetInputPinList():
+            if pin.pinType == HdlPinTypes.Clk:
+                clkPin = pin
+                break
+        return clkPin
 
     ##########################################################################
     def GetOutputPinList(self):

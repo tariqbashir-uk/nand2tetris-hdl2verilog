@@ -13,7 +13,7 @@ class VerilogDFFModule():
         dffContents  = "module DFF(in, clk, out);\n"
         dffContents += "input in;   // Data input\n"
         dffContents += "input clk;  // clock input\n" 
-        dffContents += "output out; // output Q\n"
+        dffContents += "output reg out; // output Q\n"
         dffContents += "\n"
         dffContents += "initial begin\n"
         dffContents += "  out=0;\n"

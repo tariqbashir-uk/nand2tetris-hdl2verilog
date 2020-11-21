@@ -38,13 +38,19 @@ class HdlToVerilogMapper():
 
     ##########################################################################
     def CreateVerilogModuleTB(self, tstScript : TstScript, outputFolder):
-        hdlChip       = tstScript.testChip
+        hdlChip       = tstScript.testChip # type: HDLChip
         verilogModGen = VerilogTestBenchGenerator(outputFolder)
-
+        
+        clkPinName = None
+        clkPin     = hdlChip.GetClkPin()
+        if clkPin:
+            clkPinName = clkPin.pinName
+            
         verilogModuleTB = VerilogModuleTB(tstScript.testName + "_tb",
                                           tstScript.testHdlModule,
                                           tstScript.testName + ".vcd",
-                                          tstScript.outputFile)
+                                          tstScript.outputFile,
+                                          clkPinName)
 
         portList = []
         for inputPin in hdlChip.GetInputPinList(): #type: HdlPin
@@ -160,7 +166,7 @@ class HdlToVerilogMapper():
     def _HdlPinToVerilogPort(self, hdlPin : HdlPin, bitWidth):
         portDirection = VerilogPortDirectionTypes.unknown
 
-        if hdlPin.pinType == HdlPinTypes.Input:
+        if hdlPin.pinType == HdlPinTypes.Input or hdlPin.pinType == HdlPinTypes.Clk:
             portDirection = VerilogPortDirectionTypes.input
         elif hdlPin.pinType == HdlPinTypes.Output:
             portDirection = VerilogPortDirectionTypes.output
