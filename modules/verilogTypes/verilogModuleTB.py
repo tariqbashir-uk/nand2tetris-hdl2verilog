@@ -81,10 +81,10 @@ class VerilogModuleTB():
 
         sequenceNumber = 1
         self.logger.Info("Test Steps:")
-        for setSequence in self.testSequences: #Type: TstSetSequence
+        for setSequence in self.testSequences: #type: TstSetSequence
             self.logger.Info("  Test Step: %d" % (sequenceNumber))
             if setSequence.setOperations:
-                for setOperation in setSequence.setOperations: #Type: TstSetOperation
+                for setOperation in setSequence.setOperations: #type: TstSetOperation
                     self.logger.Info("    Operation: %s = %s" % (setOperation.pinName, setOperation.pinValue))
             sequenceNumber += 1
         self.logger.Info("***** END: %s Verilog TestBench Module *****" % (self.moduleName))

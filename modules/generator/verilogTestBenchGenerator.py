@@ -2,6 +2,9 @@ from os.path import join
 from modules.core.logger import Logger
 from modules.core.textFile import TextFile
 from modules.verilogTypes.verilogModuleTB import VerilogModuleTB
+from modules.tstTypes.tstSetSequence import TstSetSequence
+from modules.tstTypes.tstSetSequenceTypes import TstSetSequenceTypes
+from modules.tstTypes.tstSetOperation import TstSetOperation
 import modules.settings as settings
 
 class VerilogTestBenchGenerator:
@@ -75,13 +78,22 @@ class VerilogTestBenchGenerator:
         verilogText += ("%s$fdisplay(write_data, \"| %s |\");\n" % (" ".rjust(indent), ' | '.join([x for x in outputFormatList])))
         verilogText += "\n"
         
-        for setSequence in verilogModuleTB.testSequences: #Type: TstSetSequence
+        clkCycleNum = 0
+        for setSequence in verilogModuleTB.testSequences: #type: TstSetSequence
+            timeStr = ""
+            if TstSetSequenceTypes.tick == setSequence.sequenceType:
+                timeStr = ("| %d+ " % clkCycleNum)
+                clkCycleNum += 1
+            elif TstSetSequenceTypes.tock == setSequence.sequenceType:
+                timeStr = ("| %d " % clkCycleNum)
+
             if setSequence.setOperations:
-                for setOperation in setSequence.setOperations: #Type: TstSetOperation
+                for setOperation in setSequence.setOperations: #type: TstSetOperation
                     verilogText += ("%s%s = %s;\n" % (" ".rjust(indent), setOperation.pinName, setOperation.pinValue))
             verilogText += ("%s#period; %s\n" % (" ".rjust(indent), clkInvertStr))
-            verilogText += ("%s$fdisplay(write_data, \"| %s |\", %s);\n" % 
-                               (" ".rjust(indent), 
+            verilogText += ("%s$fdisplay(write_data, \"%s| %s |\", %s);\n" % 
+                               (" ".rjust(indent),
+                                timeStr,
                                 ' | '.join([x for x in testOutputFormat]),
                                 ', '.join([x for x in outputParamList])))
             verilogText += "\n"
