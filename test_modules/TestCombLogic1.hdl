@@ -1,10 +1,14 @@
 // TestCombLogic1
+// Note: load param, isn't really a load action. 
+//       However, its to test the tst parsers can
+//       differentiate a load command with a pin
+//       called load.
 
 CHIP TestCombLogic1 {
-    IN a;
+    IN load;
     OUT out;
 
     PARTS:
-      Nand(a=a, b=dffOut, out=nandOut);
+      Nand(a=load, b=dffOut, out=nandOut);
       DFF(in=nandOut, out=dffOut, out=out);
 }
