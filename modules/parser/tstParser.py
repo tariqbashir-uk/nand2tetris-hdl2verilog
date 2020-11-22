@@ -3,6 +3,7 @@ from modules.tstTypes.tstScript import TstScript
 from modules.tstTypes.tstSetSequence import TstSetSequence
 from modules.tstTypes.tstSetOperation import TstSetOperation
 from modules.tstTypes.tstSetSequenceTypes import TstSetSequenceTypes
+from modules.tstTypes.tstOutputParam import TstOutputParam
 
 from ply import lex, yacc
 
@@ -13,7 +14,7 @@ class TstParser:
     
     tokens = [
         'NAME', 'NUMBER', 'COMMA', 'DOT', 'DASH', 'COMMENT1', 
-        'COMMENT2', 'SEMICOLON', 'PERCENT', 'MINUS'
+        'COMMENT2', 'SEMICOLON', 'PERCENT'
      ] + reserved
 
     #literals = ['%']
@@ -24,7 +25,6 @@ class TstParser:
     t_DASH = r'-'
     t_SEMICOLON = r';'
     t_PERCENT = r'%'
-    t_MINUS = r"-"
 
     def __init__(self):
         self.logger    = Logger()
@@ -148,13 +148,13 @@ class TstParser:
 
     def p_set_statement(self, p):
         '''set_statement : set NAME NUMBER COMMA
-                         | set NAME MINUS NUMBER COMMA
+                         | set NAME DASH NUMBER COMMA
                          | set NAME PERCENT NAME COMMA
-                         | set NAME PERCENT NAME SEMICOLON       
+                         | set NAME PERCENT NAME SEMICOLON  
                          | set load NUMBER COMMA
-                         | set load MINUS NUMBER COMMA
+                         | set load DASH NUMBER COMMA
                          | set load PERCENT NAME COMMA
-                         | set load PERCENT NAME SEMICOLON       
+                         | set load PERCENT NAME SEMICOLON 
                          '''
         pinValue = ""
         pinName  = p[2]
@@ -220,7 +220,7 @@ class TstParser:
                         | load PERCENT NAME DOT NUMBER DOT NUMBER
                         '''
         #p[0] = ("%s%s%s%s%s%s%s" % (p[1], p[2], p[3], p[4], p[5], p[6], p[7]))
-        p[0] = p[1]
+        p[0] = TstOutputParam(p[1], p[3])
         return
 
     def p_error(self, p):

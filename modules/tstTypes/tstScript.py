@@ -34,7 +34,7 @@ class TstScript():
         self.logger.Debug("Test module:   %s" % (self.testHdlModule))
         self.logger.Debug("Output file:   %s" % (self.outputFile))
         self.logger.Debug("Compare file:  %s" % (self.compareFile))
-        self.logger.Debug("Output format: %s" % (', '.join(self.outputFormatList)))
+        self.logger.Debug("Output format: %s" % (', '.join([x.GetParamName() for x in self.outputFormatList])))
 
         sequenceNumber = 1
         for setSequence in self.setSequences: #Type: TstSetSequence

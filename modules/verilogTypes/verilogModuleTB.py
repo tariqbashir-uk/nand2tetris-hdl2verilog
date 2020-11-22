@@ -66,7 +66,7 @@ class VerilogModuleTB():
 
     ##########################################################################
     def GetOutputParamList(self):
-        return [x for x in self.outputFormatList if x != "time"]
+        return [x for x in self.outputFormatList if x.GetParamName() != "time"]
 
     ##########################################################################
     def GetClkPortName(self):

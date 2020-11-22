@@ -30,8 +30,8 @@ class VerilogTestBenchGenerator:
 
         indent += settings.DEFAULT_INDENT
         paramList = []
-        paramList.extend([("%sreg  %s" % (" ".rjust(indent), x.GetPortStr())) for x in verilogModuleTB.GetInputPortList()])
-        paramList.extend([("%swire %s" % (" ".rjust(indent), x.GetPortStr())) for x in verilogModuleTB.GetOutputPortList()])
+        paramList.extend([("%sreg signed %s" % (" ".rjust(indent), x.GetPortStr())) for x in verilogModuleTB.GetInputPortList()])
+        paramList.extend([("%swire signed %s" % (" ".rjust(indent), x.GetPortStr())) for x in verilogModuleTB.GetOutputPortList()])
 
         if len(paramList) > 0:
             verilogText += (';\n'.join([x for x in paramList]))
@@ -49,9 +49,10 @@ class VerilogTestBenchGenerator:
         screenOutputFormat = []
         for paramName in paramNameList:
             testModuleParams.append(".%s (%s)" % (paramName, paramName))
-            screenOutputFormat.append("%s = %%b" % (paramName))
-            if paramName in outputFormatList:
-                testOutputFormat.append("%b")
+            for outputParam in outputFormatList:
+                if paramName == outputParam.GetParamName():
+                    testOutputFormat.append(outputParam.GetVerilogFormat())
+                    screenOutputFormat.append("%s = %s" % (paramName, outputParam.GetVerilogFormat()))
 
         verilogText += "\n"
         verilogText += "\n"
@@ -75,7 +76,7 @@ class VerilogTestBenchGenerator:
         verilogText += ("%s$dumpvars(0, %s);\n" % (" ".rjust(indent), verilogModuleTB.moduleName.replace("-", "_")))
         verilogText += ("%swrite_data = $fopen(\"%s\");\n" % (" ".rjust(indent), verilogModuleTB.outFilename))
         verilogText += "\n"
-        verilogText += ("%s$fdisplay(write_data, \"| %s |\");\n" % (" ".rjust(indent), ' | '.join([x for x in outputFormatList])))
+        verilogText += ("%s$fdisplay(write_data, \"| %s |\");\n" % (" ".rjust(indent), ' | '.join([x.GetParamName() for x in outputFormatList])))
         verilogText += "\n"
         
         clkCycleNum = 0
@@ -95,7 +96,7 @@ class VerilogTestBenchGenerator:
                                (" ".rjust(indent),
                                 timeStr,
                                 ' | '.join([x for x in testOutputFormat]),
-                                ', '.join([x for x in outputParamList])))
+                                ', '.join([x.GetParamName() for x in outputParamList])))
             verilogText += "\n"
 
         verilogText += ("%s#period; %s\n" % (" ".rjust(indent), clkInvertStr))
@@ -113,7 +114,7 @@ class VerilogTestBenchGenerator:
         verilogText += ("%s$monitor($time,\": %s\", %s);\n" % 
                            (" ".rjust(indent),
                             ' | '.join([x for x in screenOutputFormat]),
-                            ', '.join([x for x in paramNameList])))
+                            ', '.join([x.GetParamName() for x in outputParamList])))
 
         indent -= settings.DEFAULT_INDENT
         verilogText += ("%send\n" % (" ".rjust(indent)))
