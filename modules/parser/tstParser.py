@@ -53,12 +53,14 @@ class TstParser:
         t.lexer.lineno += len(t.value)
 
     def t_COMMENT1(self, t):
-        r'(/\*(.|\n)*?\*/)'
+        r'(/\*(.|\n)*?\*/\n)'
+        t.lexer.lineno += len(t.value.split("\n")) - 1
         #return t
         pass
 
     def t_COMMENT2(self, t):
         r'(//.*?(\n|$))'
+        t.lexer.lineno += 1
         #return t
         pass
 
@@ -149,6 +151,10 @@ class TstParser:
                          | set NAME MINUS NUMBER COMMA
                          | set NAME PERCENT NAME COMMA
                          | set NAME PERCENT NAME SEMICOLON       
+                         | set load NUMBER COMMA
+                         | set load MINUS NUMBER COMMA
+                         | set load PERCENT NAME COMMA
+                         | set load PERCENT NAME SEMICOLON       
                          '''
         pinValue = ""
         pinName  = p[2]
@@ -210,14 +216,16 @@ class TstParser:
 
     def p_output_param(self, p):
         # a%B1.16.1
-        '''output_param : NAME PERCENT NAME DOT NUMBER DOT NUMBER'''
+        '''output_param : NAME PERCENT NAME DOT NUMBER DOT NUMBER
+                        | load PERCENT NAME DOT NUMBER DOT NUMBER
+                        '''
         #p[0] = ("%s%s%s%s%s%s%s" % (p[1], p[2], p[3], p[4], p[5], p[6], p[7]))
         p[0] = p[1]
         return
 
     def p_error(self, p):
         if p:
-            error_msg = "syntax error '%s'" % p.value
+            error_msg = "syntax error '%s' at %d" % (p.value, p.lineno)
         else:
             error_msg = "syntax error at end of file"
 
