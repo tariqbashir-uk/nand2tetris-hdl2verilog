@@ -63,10 +63,11 @@ class HdlChipList():
             clkPin             = None
             partsNeedingClkCon = []
             for part in hdlChip.partList: # type: HdlChipPart
-                partChip = self.GetChip(part.partName)
-                clkPin   = self._GetClkPinInDependencies(partChip)
-                if clkPin:
+                partChip  = self.GetChip(part.partName)
+                tmpClkPin = self._GetClkPinInDependencies(partChip)
+                if tmpClkPin:
                     partsNeedingClkCon.append(part)
+                    clkPin = tmpClkPin
             
             # If one of the parts contains a chip with a clk input, then add the input
             # to it an create a connection in the part.
