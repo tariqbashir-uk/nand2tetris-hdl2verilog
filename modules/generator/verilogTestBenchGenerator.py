@@ -30,7 +30,7 @@ class VerilogTestBenchGenerator:
 
         indent += settings.DEFAULT_INDENT
         paramList = []
-        paramList.extend([("%sreg signed %s" % (" ".rjust(indent), x.GetPortStr())) for x in verilogModuleTB.GetInputPortList()])
+        paramList.extend([("%sreg %s %s" % (" ".rjust(indent), verilogModuleTB.GetPortSignedStr(x.portName), x.GetPortStr())) for x in verilogModuleTB.GetInputPortList()])
         paramList.extend([("%swire signed %s" % (" ".rjust(indent), x.GetPortStr())) for x in verilogModuleTB.GetOutputPortList()])
 
         if len(paramList) > 0:
@@ -82,16 +82,21 @@ class VerilogTestBenchGenerator:
         clkCycleNum = 0
         for setSequence in verilogModuleTB.testSequences: #type: TstSetSequence
             timeStr = ""
+            clkStrThisSeq = ""
             if TstSetSequenceTypes.tick == setSequence.sequenceType:
                 timeStr = ("| %d+ " % clkCycleNum)
                 clkCycleNum += 1
+                clkStrThisSeq = clkInvertStr
             elif TstSetSequenceTypes.tock == setSequence.sequenceType:
+                timeStr = ("| %d " % clkCycleNum)
+                clkStrThisSeq = clkInvertStr
+            elif TstSetSequenceTypes.eval == setSequence.sequenceType and clkPortName:
                 timeStr = ("| %d " % clkCycleNum)
 
             if setSequence.setOperations:
                 for setOperation in setSequence.setOperations: #type: TstSetOperation
                     verilogText += ("%s%s = %s;\n" % (" ".rjust(indent), setOperation.pinName, setOperation.pinValue))
-            verilogText += ("%s#period; %s\n" % (" ".rjust(indent), clkInvertStr))
+            verilogText += ("%s#period; %s\n" % (" ".rjust(indent), clkStrThisSeq))
             verilogText += ("%s$fdisplay(write_data, \"%s| %s |\", %s);\n" % 
                                (" ".rjust(indent),
                                 timeStr,

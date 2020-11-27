@@ -132,17 +132,24 @@ class TstParser:
     def p_set_sequence(self, p):
         '''set_sequence : set_list eval_statement output SEMICOLON
                         | set_list tick_statement output SEMICOLON
+                        | set_list tick_statement output COMMA tock_statement output SEMICOLON
                         | set_list tock_statement output SEMICOLON
+                        | tick_statement output SEMICOLON
                         | tock_statement output SEMICOLON
                         '''
         if len(p) == 5:
             setList      =  p[1]
+            sequenceType = self.GetSequenceType(p[2])
+        elif len(p) == 8:
+            setList      = p[1]
             sequenceType = self.GetSequenceType(p[2])
         else:
             setList      = None
             sequenceType = self.GetSequenceType(p[1])
             
         self.tstScript.AddSetSequence(TstSetSequence(sequenceType, setList))
+        if len(p) == 8:
+            self.tstScript.AddSetSequence(TstSetSequence(self.GetSequenceType(p[5]), None))
         #print("set_sequence: %s, len = %d" % (sequenceType, len(p)))
         return
 
@@ -220,7 +227,7 @@ class TstParser:
                         | load PERCENT NAME DOT NUMBER DOT NUMBER
                         '''
         #p[0] = ("%s%s%s%s%s%s%s" % (p[1], p[2], p[3], p[4], p[5], p[6], p[7]))
-        p[0] = TstOutputParam(p[1], p[3])
+        p[0] = TstOutputParam(p[1], p[3], p[5], p[7])
         return
 
     def p_error(self, p):
