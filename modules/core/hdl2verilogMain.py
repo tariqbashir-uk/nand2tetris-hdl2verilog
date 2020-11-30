@@ -68,14 +68,20 @@ class Hdl2verilogMain():
 
         runSHFile   = TextFile(join(outputFolder, 'runme.sh'))
         runContents = "set -e\n"
+        runContents += "\n"
+        runContents += "if [[ ! -d ./out ]]; then\n"
+        runContents += "  mkdir out\n"
+        runContents += "fi\n"
+        runContents += "\n"
 
+        verboseFlag = ""
+        #verboseFlag = " -v "
         for tstToRun in tstsToRun: # type: TstScript
             moduleList = hdlChipList.GetChipDependencyList(tstToRun.testChip)
             moduleList = [x + ".v" for x in moduleList]
 
             runContents += ("echo \"Building and running test for %s\"\n" % (tstToRun.testName))
-            runContents += ("iverilog -o ./out/%s %s %s\n" % (tstToRun.testName, tstToRun.testName + "_tb.v", " ".join([x for x in moduleList])))
-            # iverilog -o ./out/And And_tb.v Not.v And.v Nand.v
+            runContents += ("iverilog %s -o ./out/%s %s %s\n" % (verboseFlag, tstToRun.testName, tstToRun.testName + "_tb.v", " ".join([x for x in moduleList])))
             runContents += ("vvp ./out/%s\n" % (tstToRun.testName))
             runContents += ("diff -w %s/%s %s\n" % (self.fileActions.GetAbsoluteFilename(inputFolder), tstToRun.compareFile, tstToRun.outputFile))
             runContents += "\n"

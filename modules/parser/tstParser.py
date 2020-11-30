@@ -116,41 +116,32 @@ class TstParser:
 
     def p_eval_statement(self, p):
         '''eval_statement : eval COMMA'''
-        p[0] = p[1]
+        p[0] = TstSetSequence(TstSetSequenceTypes.eval, None)
         return
 
     def p_tock_statement(self, p):
         '''tock_statement : tock COMMA'''
-        p[0] = p[1]
+        p[0] = TstSetSequence(TstSetSequenceTypes.tock, None)
         return
 
     def p_tick_statement(self, p):
         '''tick_statement : tick COMMA'''
-        p[0] = p[1]
+        p[0] = TstSetSequence(TstSetSequenceTypes.tick, None)
         return
 
     def p_set_sequence(self, p):
-        '''set_sequence : set_list eval_statement output SEMICOLON
-                        | set_list tick_statement output SEMICOLON
-                        | set_list tick_statement output COMMA tock_statement output SEMICOLON
-                        | set_list tock_statement output SEMICOLON
-                        | tick_statement output SEMICOLON
-                        | tock_statement output SEMICOLON
+        '''set_sequence : set_statement
+                        | tick_statement 
+                        | tock_statement
+                        | eval_statement
+                        | output COMMA
+                        | output SEMICOLON
                         '''
-        if len(p) == 5:
-            setList      =  p[1]
-            sequenceType = self.GetSequenceType(p[2])
-        elif len(p) == 8:
-            setList      = p[1]
-            sequenceType = self.GetSequenceType(p[2])
-        else:
-            setList      = None
-            sequenceType = self.GetSequenceType(p[1])
-            
-        self.tstScript.AddSetSequence(TstSetSequence(sequenceType, setList))
-        if len(p) == 8:
-            self.tstScript.AddSetSequence(TstSetSequence(self.GetSequenceType(p[5]), None))
-        #print("set_sequence: %s, len = %d" % (sequenceType, len(p)))
+        if type(p[1]) == str:
+            p[1] = TstSetSequence(TstSetSequenceTypes.output, None)
+
+        #print("set_sequence: %s, len = %d" % (p[1], len(p)))
+        self.tstScript.AddSetSequence(p[1])
         return
 
     def p_set_statement(self, p):
@@ -170,20 +161,8 @@ class TstParser:
         else:
             pinValue += str(p[3])
 
-        p[0] = TstSetOperation(pinName, pinValue)
+        p[0] = TstSetSequence(TstSetSequenceTypes.set, TstSetOperation(pinName, pinValue))
         #print("set_statement: %s = %s" % (pinName, pinValue))
-        return
-
-    def p_set_list(self, p):
-        '''set_list : set_list set_statement
-                    | set_statement    
-                    '''        
-        
-        if len(p) > 2:
-            p[0] = p[1]
-            p[0].append(p[2])
-        else:
-            p[0] = [p[1]]
         return
 
     def p_output_statement(self, p):

@@ -48,3 +48,13 @@ tick,
 output,
 tock,
 output;
+
+set load 0,
+output,
+tick,
+eval,
+eval,
+eval,
+output,
+tock,
+output;

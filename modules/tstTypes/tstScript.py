@@ -39,9 +39,8 @@ class TstScript():
         sequenceNumber = 1
         for setSequence in self.setSequences: #Type: TstSetSequence
             self.logger.Debug("  Sequence: %d" % (sequenceNumber))
-            if setSequence.setOperations:
-                for setOperation in setSequence.setOperations: #Type: TstSetOperation
-                    self.logger.Debug("    Operation: %s = %s" % (setOperation.pinName, setOperation.pinValue))
+            if setSequence.setOperation:
+                self.logger.Debug("    Operation: %s = %s" % (setSequence.setOperation.pinName, setSequence.setOperation.pinValue))
             sequenceNumber += 1
 
         self.logger.Debug("***** END:   %s Test Script  *****" % (self.testName))

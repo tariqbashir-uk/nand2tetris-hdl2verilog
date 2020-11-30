@@ -76,14 +76,13 @@ class VerilogModuleTB():
 
     ##########################################################################
     def GetPortSignedStr(self, portName):
-        for port in self.inputPorts:
-            if port.portName == portName:
-                #print("%s: %d %d" % (portName, outputParam.GetParamWidth(), math.floor(math.log2(port.GetParamWidth())) + 1))
-                print(portName)
-                print(port.portBitWidth)
-                print("%s: %d %d" % (portName, port.portBitWidth, math.floor(math.log2(port.portBitWidth)) + 1))
-
-        return "signed"
+        signedStr = "signed"
+        # HDL HardwareSimulator.sh treats certain params as unsigned if they
+        # are specified as decimal. This is a hack to replicate that behaviour. 
+        if portName == "address" or portName == "sel":
+            signedStr = "unsigned"
+               
+        return signedStr
 
     ##########################################################################
     def DumpModuleDetails(self):

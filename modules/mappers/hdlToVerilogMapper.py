@@ -65,12 +65,12 @@ class HdlToVerilogMapper():
         verilogModuleTB.AddOutputFormatList(tstScript.GetOutputFormatList())
         
         for setSequence in tstScript.setSequences: #type: TstSetSequence
-            testSequenceV = []
-            if setSequence.setOperations:
-                for setOperation in setSequence.setOperations: #type: TstSetOperation
-                    testSequenceV.append(TstSetOperation(setOperation.pinName, setOperation.pinValue.replace("%B", "'b")))
+            setOperation = None
+            if setSequence.setOperation:
+                setOperation = TstSetOperation(setSequence.setOperation.pinName, 
+                                               self._HdlFormatToVerilogFormatLiteral(setSequence.setOperation.pinValue))
 
-            verilogModuleTB.AddTestSequence(TstSetSequence(setSequence.sequenceType, testSequenceV))
+            verilogModuleTB.AddTestSequence(TstSetSequence(setSequence.sequenceType, setOperation))
 
         #verilogModuleTB.DumpModuleDetails()
         verilogModGen.CreateModule(verilogModuleTB)
@@ -161,6 +161,11 @@ class HdlToVerilogMapper():
         verilogMainModule.DumpModuleDetails()
         verilogModGen.CreateModule(verilogMainModule)
         return
+
+    ##########################################################################
+    def _HdlFormatToVerilogFormatLiteral(self, hdlLiteral):
+        verilogLiteral = hdlLiteral.replace("%B", "'b").replace("%X", "'h")
+        return verilogLiteral
 
     ##########################################################################
     def _HdlPinToVerilogPort(self, hdlPin : HdlPin, bitWidth):

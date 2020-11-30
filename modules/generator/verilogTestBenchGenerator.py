@@ -49,11 +49,13 @@ class VerilogTestBenchGenerator:
         screenOutputFormat = []
         for paramName in paramNameList:
             testModuleParams.append(".%s (%s)" % (paramName, paramName))
-            for outputParam in outputFormatList:
-                if paramName == outputParam.GetParamName():
-                    testOutputFormat.append(outputParam.GetVerilogFormat())
-                    screenOutputFormat.append("%s = %s" % (paramName, outputParam.GetVerilogFormat()))
-
+        
+        outputParamNameList = [x.GetParamName() for x in outputParamList]
+        for outputParam in outputFormatList:
+            if outputParam.GetParamName() in outputParamNameList:
+                testOutputFormat.append(outputParam.GetVerilogFormat())
+                screenOutputFormat.append("%s = %s" % (outputParam.GetParamName(), outputParam.GetVerilogFormat()))
+        
         verilogText += "\n"
         verilogText += "\n"
         verilogText += ("%s%s %s(%s);\n" % (" ".rjust(indent), 
@@ -79,9 +81,10 @@ class VerilogTestBenchGenerator:
         verilogText += ("%s$fdisplay(write_data, \"| %s |\");\n" % (" ".rjust(indent), ' | '.join([x.GetParamName() for x in outputFormatList])))
         verilogText += "\n"
         
-        clkCycleNum = 0
+        clkCycleNum  = 0
+        timeStr      = ""
+        periodDisplayedThisOutputCmd = False 
         for setSequence in verilogModuleTB.testSequences: #type: TstSetSequence
-            timeStr = ""
             clkStrThisSeq = ""
             if TstSetSequenceTypes.tick == setSequence.sequenceType:
                 timeStr = ("| %d+ " % clkCycleNum)
@@ -90,19 +93,24 @@ class VerilogTestBenchGenerator:
             elif TstSetSequenceTypes.tock == setSequence.sequenceType:
                 timeStr = ("| %d " % clkCycleNum)
                 clkStrThisSeq = clkInvertStr
-            elif TstSetSequenceTypes.eval == setSequence.sequenceType and clkPortName:
-                timeStr = ("| %d " % clkCycleNum)
 
-            if setSequence.setOperations:
-                for setOperation in setSequence.setOperations: #type: TstSetOperation
-                    verilogText += ("%s%s = %s;\n" % (" ".rjust(indent), setOperation.pinName, setOperation.pinValue))
-            verilogText += ("%s#period; %s\n" % (" ".rjust(indent), clkStrThisSeq))
-            verilogText += ("%s$fdisplay(write_data, \"%s| %s |\", %s);\n" % 
-                               (" ".rjust(indent),
-                                timeStr,
-                                ' | '.join([x for x in testOutputFormat]),
-                                ', '.join([x.GetParamName() for x in outputParamList])))
-            verilogText += "\n"
+            if TstSetSequenceTypes.set == setSequence.sequenceType:
+                verilogText += ("%s%s = %s;\n" % (" ".rjust(indent), setSequence.setOperation.pinName, setSequence.setOperation.pinValue))
+            
+            if (TstSetSequenceTypes.eval == setSequence.sequenceType or
+                TstSetSequenceTypes.tick == setSequence.sequenceType or 
+                TstSetSequenceTypes.tock == setSequence.sequenceType) and not periodDisplayedThisOutputCmd:
+                verilogText += ("%s#period; %s\n" % (" ".rjust(indent), clkStrThisSeq))
+                periodDisplayedThisOutputCmd = True
+            
+            if TstSetSequenceTypes.output == setSequence.sequenceType:
+                verilogText += ("%s$fdisplay(write_data, \"%s| %s |\", %s);\n" % 
+                                   (" ".rjust(indent),
+                                    timeStr,
+                                    ' | '.join([x for x in testOutputFormat]),
+                                    ', '.join([x.GetParamName() for x in outputParamList])))
+                verilogText += "\n"
+                periodDisplayedThisOutputCmd = False 
 
         verilogText += ("%s#period; %s\n" % (" ".rjust(indent), clkInvertStr))
         
