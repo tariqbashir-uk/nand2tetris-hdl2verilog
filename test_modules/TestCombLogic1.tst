@@ -25,3 +25,26 @@ output;
 
 tock,
 output;
+
+set load 1,
+tick,
+output,
+tock,
+output;
+
+set load 0,
+eval,
+output;
+
+tick,
+output,
+tock,
+output;
+
+set load 1,
+eval,
+output,
+tick,
+output,
+tock,
+output;
