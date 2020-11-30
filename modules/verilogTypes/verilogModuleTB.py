@@ -5,6 +5,8 @@ from modules.verilogTypes.verilogPortDirectionTypes import VerilogPortDirectionT
 from modules.tstTypes.tstSetSequence import TstSetSequence
 from modules.tstTypes.tstSetOperation import TstSetOperation
 
+import math
+
 class VerilogModuleTB():
     def __init__(self, moduleName, testModuleName, dumpFilename, outFilename, clkPortName):
         self.logger         = Logger()
@@ -71,6 +73,17 @@ class VerilogModuleTB():
     ##########################################################################
     def GetClkPortName(self):
         return self.clkPortName
+
+    ##########################################################################
+    def GetPortSignedStr(self, portName):
+        for port in self.inputPorts:
+            if port.portName == portName:
+                #print("%s: %d %d" % (portName, outputParam.GetParamWidth(), math.floor(math.log2(port.GetParamWidth())) + 1))
+                print(portName)
+                print(port.portBitWidth)
+                print("%s: %d %d" % (portName, port.portBitWidth, math.floor(math.log2(port.portBitWidth)) + 1))
+
+        return "signed"
 
     ##########################################################################
     def DumpModuleDetails(self):
