@@ -5,13 +5,16 @@ from modules.verilogTypes.verilogPortDirectionTypes import VerilogPortDirectionT
 from modules.tstTypes.tstSetSequence import TstSetSequence
 from modules.tstTypes.tstSetOperation import TstSetOperation
 
+import math
+
 class VerilogModuleTB():
-    def __init__(self, moduleName, testModuleName, dumpFilename, outFilename):
+    def __init__(self, moduleName, testModuleName, dumpFilename, outFilename, clkPortName):
         self.logger         = Logger()
         self.moduleName     = moduleName
         self.testModuleName = testModuleName
         self.dumpFilename   = dumpFilename
         self.outFilename    = outFilename
+        self.clkPortName    = clkPortName
         self.inputPorts     = []
         self.outputPorts    = []
         self.outputFormats  = []
@@ -64,6 +67,24 @@ class VerilogModuleTB():
         return self.outputFormatList
 
     ##########################################################################
+    def GetOutputParamList(self):
+        return [x for x in self.outputFormatList if x.GetParamName() != "time"]
+
+    ##########################################################################
+    def GetClkPortName(self):
+        return self.clkPortName
+
+    ##########################################################################
+    def GetPortSignedStr(self, portName):
+        signedStr = "signed"
+        # HDL HardwareSimulator.sh treats certain params as unsigned if they
+        # are specified as decimal. This is a hack to replicate that behaviour. 
+        if portName == "address" or portName == "sel":
+            signedStr = "unsigned"
+               
+        return signedStr
+
+    ##########################################################################
     def DumpModuleDetails(self):
         self.logger.Info("***** START: %s Verilog TestBench Module *****" % (self.moduleName))
         self.logger.Info("Interface:")
@@ -72,10 +93,11 @@ class VerilogModuleTB():
 
         sequenceNumber = 1
         self.logger.Info("Test Steps:")
-        for setSequence in self.testSequences: #Type: TstSetSequence
+        for setSequence in self.testSequences: #type: TstSetSequence
             self.logger.Info("  Test Step: %d" % (sequenceNumber))
-            for setOperation in setSequence.setOperations: #Type: TstSetOperation
-                self.logger.Info("    Operation: %s = %s" % (setOperation.pinName, setOperation.pinValue))
+            if setSequence.setOperations:
+                for setOperation in setSequence.setOperations: #type: TstSetOperation
+                    self.logger.Info("    Operation: %s = %s" % (setOperation.pinName, setOperation.pinValue))
             sequenceNumber += 1
         self.logger.Info("***** END: %s Verilog TestBench Module *****" % (self.moduleName))
         return    

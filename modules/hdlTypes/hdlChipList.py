@@ -1,5 +1,6 @@
 from modules.core.logger import Logger
 from modules.hdlTypes.hdlNandChip import HdlNandChip
+from modules.hdlTypes.hdlDFFChip import HdlDFFChip
 from modules.hdlTypes.hdlChip import HdlChip
 from modules.hdlTypes.hdlPin import HdlPin
 from modules.hdlTypes.hdlPinTypes import HdlPinTypes
@@ -18,6 +19,13 @@ class HdlChipList():
         return
 
     ##########################################################################
+    def _GetChipsFromNameList(self, chipNameList):
+        chipList = []
+        for chipName in chipNameList:
+            chipList.append(self.GetChip(chipName))
+        return chipList
+
+    ##########################################################################
     def GetChip(self, chipName):
         result = None
         for hdlChip in self.chipList:
@@ -27,6 +35,9 @@ class HdlChipList():
 
         if not result and chipName == 'Nand':
             result = HdlNandChip.GetChip()
+
+        if not result and chipName == 'DFF':
+            result = HdlDFFChip.GetChip()
 
         return result
 
@@ -44,6 +55,44 @@ class HdlChipList():
 
         self.logger.Info("Completed: UpdateAllPinBitWidths")
         return
+
+    ##########################################################################
+    def CheckAndAddClockInputs(self):
+        self.logger.Info("Started: CheckAndAddClockInputs")
+        for hdlChip in self.chipList:
+            clkPin             = None
+            partsNeedingClkCon = []
+            for part in hdlChip.partList: # type: HdlChipPart
+                partChip  = self.GetChip(part.partName)
+                tmpClkPin = self._GetClkPinInDependencies(partChip)
+                if tmpClkPin:
+                    partsNeedingClkCon.append(part)
+                    clkPin = tmpClkPin
+            
+            # If one of the parts contains a chip with a clk input, then add the input
+            # to it an create a connection in the part.
+            if clkPin:
+                if not hdlChip.GetClkPin():
+                    hdlChip.AddInputPins([clkPin])
+
+                for part in partsNeedingClkCon:
+                    part.AddConnection(HdlConnection(clkPin, clkPin))
+        
+        self.logger.Info("Completed: CheckAndAddClockInputs")
+        return
+
+    ##########################################################################
+    def _GetClkPinInDependencies(self, hdlChip : HdlChip):
+        chipDependencyList = self.GetChipDependencyList(hdlChip)
+        chipList           = self._GetChipsFromNameList(chipDependencyList)
+
+        clkPin = None
+        for chip in chipList:
+            clkPin = chip.GetClkPin()
+            if clkPin:
+               break
+
+        return clkPin
 
     ##########################################################################
     def UpdateAllPartConnections(self):

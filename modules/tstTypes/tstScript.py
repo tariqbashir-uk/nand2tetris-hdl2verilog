@@ -34,13 +34,13 @@ class TstScript():
         self.logger.Debug("Test module:   %s" % (self.testHdlModule))
         self.logger.Debug("Output file:   %s" % (self.outputFile))
         self.logger.Debug("Compare file:  %s" % (self.compareFile))
-        self.logger.Debug("Output format: %s" % (', '.join(self.outputFormatList)))
+        self.logger.Debug("Output format: %s" % (', '.join([x.GetParamName() for x in self.outputFormatList])))
 
         sequenceNumber = 1
         for setSequence in self.setSequences: #Type: TstSetSequence
             self.logger.Debug("  Sequence: %d" % (sequenceNumber))
-            for setOperation in setSequence.setOperations: #Type: TstSetOperation
-                self.logger.Debug("    Operation: %s = %s" % (setOperation.pinName, setOperation.pinValue))
+            if setSequence.setOperation:
+                self.logger.Debug("    Operation: %s = %s" % (setSequence.setOperation.pinName, setSequence.setOperation.pinValue))
             sequenceNumber += 1
 
         self.logger.Debug("***** END:   %s Test Script  *****" % (self.testName))

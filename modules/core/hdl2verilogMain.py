@@ -8,6 +8,8 @@ from modules.core.textFile import TextFile
 from modules.fileHandlers.tstFile import TstFile
 from modules.fileHandlers.hdlFile import HdlFile
 from modules.hdlTypes.hdlChipList import HdlChipList
+from modules.verilogTypes.verilogNandModule import VerilogNandModule
+from modules.verilogTypes.verilogDFFModule import VerilogDFFModule
 from modules.mappers.hdlToVerilogMapper import HdlToVerilogMapper
 
 import modules.settings as settings
@@ -40,6 +42,7 @@ class Hdl2verilogMain():
             hdlChip = hdlFile.ParseFile()
             hdlChipList.AddChip(hdlChip)
 
+        hdlChipList.CheckAndAddClockInputs()
         hdlChipList.UpdateAllPinBitWidths()
         hdlChipList.UpdateAllPartConnections()
 
@@ -65,33 +68,29 @@ class Hdl2verilogMain():
 
         runSHFile   = TextFile(join(outputFolder, 'runme.sh'))
         runContents = "set -e\n"
+        runContents += "\n"
+        runContents += "if [[ ! -d ./out ]]; then\n"
+        runContents += "  mkdir out\n"
+        runContents += "fi\n"
+        runContents += "\n"
 
+        verboseFlag = ""
+        verboseFlag = "-v -u -Wall"
         for tstToRun in tstsToRun: # type: TstScript
             moduleList = hdlChipList.GetChipDependencyList(tstToRun.testChip)
             moduleList = [x + ".v" for x in moduleList]
 
             runContents += ("echo \"Building and running test for %s\"\n" % (tstToRun.testName))
-            runContents += ("iverilog -o ./out/%s %s %s\n" % (tstToRun.testName, tstToRun.testName + "_tb.v", " ".join([x for x in moduleList])))
-            # iverilog -o ./out/And And_tb.v Not.v And.v Nand.v
+            runContents += ("iverilog %s -o ./out/%s %s %s\n" % (verboseFlag, tstToRun.testName, tstToRun.testName + "_tb.v", " ".join([x for x in moduleList])))
             runContents += ("vvp ./out/%s\n" % (tstToRun.testName))
             runContents += ("diff -w %s/%s %s\n" % (self.fileActions.GetAbsoluteFilename(inputFolder), tstToRun.compareFile, tstToRun.outputFile))
             runContents += "\n"
 
         runSHFile.WriteFile(runContents)
 
-        self.WriteNandV(outputFolder)
+        VerilogNandModule.WriteModule(outputFolder)
+        VerilogDFFModule.WriteModule(outputFolder)
         return    
-
-    ##########################################################################
-    def WriteNandV(self, outputFolder):
-        nand_v  = TextFile(join(outputFolder, 'Nand.v'))
-        nandContents  = "module Nand(out, a, b);\n"
-        nandContents += "  input a, b;\n"
-        nandContents += "  output out;\n"
-        nandContents += "  nand (out, a, b);\n"
-        nandContents += "endmodule\n"
-        nand_v.WriteFile(nandContents)
-        return
 
     ##########################################################################
     def _GetFilesWithExtInFolder(self, folder, ext):

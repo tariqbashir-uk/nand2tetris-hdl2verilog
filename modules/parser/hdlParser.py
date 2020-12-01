@@ -188,7 +188,7 @@ class HdlParser:
 
     def p_error(self, p):
         if p:
-            error_msg = "syntax error '%s'" % p.value
+            error_msg = "syntax error '%s' at %d" % (p.value, p.lineno)
         else:
             error_msg = "syntax error at end of file"
 

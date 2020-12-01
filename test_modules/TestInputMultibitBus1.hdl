@@ -1,8 +1,8 @@
 // TestInputMultibitBus1
 
 CHIP TestInputMultibitBus1 {
-    IN a[8], b[8];
-    OUT out[16];
+    IN a[8], b[8], address[6];
+    OUT out[16], out2[6];
 
     PARTS:
       TestNand16(a[0..7]=a,
@@ -10,4 +10,8 @@ CHIP TestInputMultibitBus1 {
                  b[0..7]=b,          
                  b[8..15]=a,          
                  out=out);
+
+      TestNand2(a=address[0..1],
+                b=address[1..2],
+                out=out2[0..1]);
 }

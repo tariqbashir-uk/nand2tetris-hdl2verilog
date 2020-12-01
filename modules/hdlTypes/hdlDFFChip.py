@@ -5,18 +5,18 @@ from modules.hdlTypes.hdlChipPart import HdlChipPart
 from modules.hdlTypes.hdlConnection import HdlConnection
 from modules.hdlTypes.hdlChip import HdlChip
 
-class HdlNandChip():
+class HdlDFFChip():
     def __init__(self):
         return
 
     @staticmethod
     ##########################################################################
     def GetChip():
-        nandChip = HdlChip()
-        nandChip.SetChipName("Nand")
-        nandChip.AddInputPins([HdlPin("a", HdlPinTypes.Input, None)])
-        nandChip.AddInputPins([HdlPin("b", HdlPinTypes.Input, None)])
-        nandChip.AddOutputPins([HdlPin("out", HdlPinTypes.Output, None)])
-        #nandChip.DumpChipDetails()
-        return nandChip
+        dffChip = HdlChip()
+        dffChip.SetChipName("DFF")
+        dffChip.AddInputPins([HdlPin("in", HdlPinTypes.Input, None)])
+        dffChip.AddInputPins([HdlPin("clk", HdlPinTypes.Clk, None)])
+        dffChip.AddOutputPins([HdlPin("out", HdlPinTypes.Output, None)])
+        #dffChip.DumpChipDetails()
+        return dffChip
 
