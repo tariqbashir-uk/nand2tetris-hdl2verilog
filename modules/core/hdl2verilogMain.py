@@ -75,7 +75,7 @@ class Hdl2verilogMain():
         runContents += "\n"
 
         verboseFlag = ""
-        #verboseFlag = " -v "
+        verboseFlag = "-v -u -Wall"
         for tstToRun in tstsToRun: # type: TstScript
             moduleList = hdlChipList.GetChipDependencyList(tstToRun.testChip)
             moduleList = [x + ".v" for x in moduleList]
