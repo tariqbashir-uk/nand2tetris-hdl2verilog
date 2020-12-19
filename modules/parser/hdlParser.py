@@ -80,6 +80,7 @@ class HdlParser:
     def p_statement(self, p):
         '''statement : in_list
                      | out_list
+                     | clocked_list
                      | parts
                      '''
         p[0] = p[1]
@@ -171,6 +172,11 @@ class HdlParser:
     def p_in_list(self, p):
         '''in_list : IN pinlist SEMICOLON'''
         self.hdlChip.AddInputPins(p[2])
+        return
+
+    def p_clocked_list(self, p):
+        '''clocked_list : CLOCKED pinlist SEMICOLON'''
+        self.hdlChip.AddClockedPins(p[2])
         return
 
     def p_out_list(self, p):

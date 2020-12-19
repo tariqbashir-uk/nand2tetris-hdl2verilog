@@ -1,6 +1,4 @@
 from modules.core.logger import Logger
-from modules.hdlTypes.hdlNandChip import HdlNandChip
-from modules.hdlTypes.hdlDFFChip import HdlDFFChip
 from modules.hdlTypes.hdlChip import HdlChip
 from modules.hdlTypes.hdlPin import HdlPin
 from modules.hdlTypes.hdlPinTypes import HdlPinTypes
@@ -11,11 +9,17 @@ class HdlChipList():
     def __init__(self):
         self.logger   = Logger()
         self.chipList = [] # type: list[HdlChip]
+        self.builtInChipList = [] # type: list[HdlChip]
         return
 
     ##########################################################################
     def AddChip(self, chip):
         self.chipList.append(chip)
+        return
+
+    ##########################################################################
+    def AddBuiltInChip(self, chip):
+        self.builtInChipList.append(chip)
         return
 
     ##########################################################################
@@ -33,11 +37,11 @@ class HdlChipList():
                 result = hdlChip
                 break
 
-        if not result and chipName == 'Nand':
-            result = HdlNandChip.GetChip()
-
-        if not result and chipName == 'DFF':
-            result = HdlDFFChip.GetChip()
+        if not result:
+            for hdlChip in self.builtInChipList:
+                if hdlChip.chipName == chipName:
+                    result = hdlChip
+                    break
 
         return result
 

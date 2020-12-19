@@ -15,8 +15,12 @@ do
   "${NAND2_FPGA_HARDWARESIM}" $testFile
 done
 
-echo "############# Converting modules #############"
 cd ..
+if [[ -d ./tmp_generated ]]; then
+  rm -rf ./tmp_generated
+fi
+
+echo "############# Converting modules #############"
 python3 ./hdl2verilog.py -i ./test_modules -o ./tmp_generated
 
 cd tmp_generated

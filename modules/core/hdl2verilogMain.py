@@ -7,9 +7,10 @@ from modules.core.textFile import TextFile
 
 from modules.fileHandlers.tstFile import TstFile
 from modules.fileHandlers.hdlFile import HdlFile
-from modules.hdlTypes.hdlChipList import HdlChipList
-from modules.verilogTypes.verilogNandModule import VerilogNandModule
-from modules.verilogTypes.verilogDFFModule import VerilogDFFModule
+from modules.fileHandlers.verilogFile import VerilogFile
+from modules.core.hdlChipList import HdlChipList
+from modules.core.verilogModuleList import VerilogModuleList
+from modules.verilogTypes.verilogModule import VerilogModule
 from modules.mappers.hdlToVerilogMapper import HdlToVerilogMapper
 
 import modules.settings as settings
@@ -23,22 +24,36 @@ class Hdl2verilogMain():
         return
 
     ##########################################################################
-    def Run(self, inputFolder, outputFolder):
+    def Run(self, inputFolder, builtInChipFolder, outputFolder):
         hdlStoreFolder = join(outputFolder, settings.HDL_STORE_FOLDER)
         self.fileActions.CreateFolderIfNeeded(hdlStoreFolder)
 
-        hdlFilenames = self._GetFilesWithExtInFolder(inputFolder, '.hdl')
-        for hdlFilename in hdlFilenames:
-            self.logger.Info("Copying %s to store" % (hdlFilename))
-            fullInputFilename = join(inputFolder, hdlFilename)
-            self.fileActions.CopyFile(fullInputFilename, join(hdlStoreFolder, hdlFilename))
+        verilogModuleList = VerilogModuleList(builtInChipFolder)
+        verilogFilenames = [join(builtInChipFolder, x) for x in self._GetFilesWithExtInFolder(builtInChipFolder, '.v')]
+        for verilogFilename in verilogFilenames:
+            self.logger.Info("Reading %s .." % (verilogFilename))
+            verilogFile   = VerilogFile(verilogFilename)
+            verilogModule = verilogFile.ParseFile()
+            verilogModuleList.AddBuiltInModule(verilogModule)
 
-        hdlFilenames = self._GetFilesWithExtInFolder(hdlStoreFolder, '.hdl')
         hdlChipList  = HdlChipList()
+        hdlFilenames = [join(builtInChipFolder, x) for x in self._GetFilesWithExtInFolder(builtInChipFolder, '.hdl')]
         for hdlFilename in hdlFilenames:
             self.logger.Info("Reading %s .." % (hdlFilename))
-            fullInputFilename = join(hdlStoreFolder, hdlFilename)
-            hdlFile = HdlFile(fullInputFilename)
+            hdlFile = HdlFile(hdlFilename)
+            hdlChip = hdlFile.ParseFile()
+            hdlChipList.AddBuiltInChip(hdlChip)
+
+        # for hdlFilename in hdlFilenames:
+        #     self.logger.Info("Copying %s to store" % (hdlFilename))
+        #     fullInputFilename = join(inputFolder, hdlFilename)
+        #     self.fileActions.CopyFile(fullInputFilename, join(hdlStoreFolder, hdlFilename))
+
+        # hdlFilenames = self._GetFilesWithExtInFolder(hdlStoreFolder, '.hdl')
+        hdlFilenames = [join(inputFolder, x) for x in self._GetFilesWithExtInFolder(inputFolder, '.hdl')]
+        for hdlFilename in hdlFilenames:
+            self.logger.Info("Reading %s .." % (hdlFilename))
+            hdlFile = HdlFile(hdlFilename)
             hdlChip = hdlFile.ParseFile()
             hdlChipList.AddChip(hdlChip)
 
@@ -47,7 +62,7 @@ class Hdl2verilogMain():
         hdlChipList.UpdateAllPartConnections()
 
         for hdlChip in hdlChipList.chipList:  
-            self.mapper.CreateVerilogModule(hdlChip, hdlChipList, outputFolder)
+            self.mapper.CreateVerilogModule(hdlChip, hdlChipList, verilogModuleList)
 
         tstFilenames = self._GetFilesWithExtInFolder(inputFolder, '.tst')
         
@@ -64,8 +79,6 @@ class Hdl2verilogMain():
             self.mapper.CreateVerilogModuleTB(tstScript, outputFolder)
             tstsToRun.append(tstScript)
 
-            #print(hdlChip.GetChipDependencyList())
-
         runSHFile   = TextFile(join(outputFolder, 'runme.sh'))
         runContents = "set -e\n"
         runContents += "\n"
@@ -77,19 +90,18 @@ class Hdl2verilogMain():
         verboseFlag = ""
         #verboseFlag = "-v -u -Wall"
         for tstToRun in tstsToRun: # type: TstScript
-            moduleList = hdlChipList.GetChipDependencyList(tstToRun.testChip)
-            moduleList = [x + ".v" for x in moduleList]
+            moduleList   = hdlChipList.GetChipDependencyList(tstToRun.testChip)
+            filenameList = verilogModuleList.GetFilenamesForModules(moduleList)
 
             runContents += ("echo \"Building and running test for %s\"\n" % (tstToRun.testName))
-            runContents += ("iverilog %s -o ./out/%s %s %s\n" % (verboseFlag, tstToRun.testName, tstToRun.testName + "_tb.v", " ".join([x for x in moduleList])))
+            runContents += ("iverilog %s -o ./out/%s %s %s\n" % (verboseFlag, tstToRun.testName, tstToRun.testName + "_tb.v", " ".join([x for x in filenameList])))
             runContents += ("vvp ./out/%s\n" % (tstToRun.testName))
             runContents += ("diff -w %s/%s %s\n" % (self.fileActions.GetAbsoluteFilename(inputFolder), tstToRun.compareFile, tstToRun.outputFile))
             runContents += "\n"
 
         runSHFile.WriteFile(runContents)
 
-        VerilogNandModule.WriteModule(outputFolder)
-        VerilogDFFModule.WriteModule(outputFolder)
+        verilogModuleList.WriteModules(outputFolder)
         return    
 
     ##########################################################################

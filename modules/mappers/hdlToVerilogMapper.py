@@ -1,9 +1,10 @@
 from os.path import isfile, join
 from os import listdir
-from modules.core.fileActions import FileActions
 from modules.core.logger import Logger
 
-from modules.hdlTypes.hdlChipList import HdlChipList
+from modules.core.verilogModuleList import VerilogModuleList
+from modules.core.hdlChipList import HdlChipList
+
 from modules.hdlTypes.hdlChip import HdlChip
 from modules.hdlTypes.hdlChipPart import HdlChipPart
 from modules.hdlTypes.hdlConnection import HdlConnection
@@ -23,7 +24,6 @@ from modules.verilogTypes.verilogWireAssignment import VerilogWireAssignment
 from modules.verilogTypes.verilogCallParams import VerilogCallParams
 from modules.verilogTypes.verilogSubmoduleCall import VerilogSubmoduleCall
 from modules.verilogTypes.verilogSubmoduleCallParam import VerilogSubmoduleCallParam
-from modules.generator.verilogModuleGenerator import VerilogModuleGenerator
 from modules.generator.verilogTestBenchGenerator import VerilogTestBenchGenerator
 
 from modules.mappers.hdlToVerilogParamMapper import HdlToVerilogParamMapper
@@ -77,9 +77,7 @@ class HdlToVerilogMapper():
         return
 
     ##########################################################################
-    def CreateVerilogModule(self, hdlChip : HdlChip, hdlChipList : HdlChipList, outputFolder):
-        verilogModGen = VerilogModuleGenerator(outputFolder)
-
+    def CreateVerilogModule(self, hdlChip : HdlChip, hdlChipList : HdlChipList, verilogModuleList : VerilogModuleList):
         partList = hdlChip.GetChipPartList() #type: list[HdlChipPart]
 
         verilogMainModule = VerilogModule(hdlChip.chipName)
@@ -159,7 +157,7 @@ class HdlToVerilogMapper():
             verilogMainModule.AddSubmoduleCall(verilogSubmoduleCall)
 
         verilogMainModule.DumpModuleDetails()
-        verilogModGen.CreateModule(verilogMainModule)
+        verilogModuleList.AddModule(verilogMainModule)
         return
 
     ##########################################################################
