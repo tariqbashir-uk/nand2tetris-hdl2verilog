@@ -27,13 +27,13 @@ class Hdl2verilogMain():
         hdlStoreFolder = join(outputFolder, settings.HDL_STORE_FOLDER)
         self.fileActions.CreateFolderIfNeeded(hdlStoreFolder)
 
-        hdlFilenames = self._GetFilesWithExtInFolder(inputFolder, 'hdl')
+        hdlFilenames = self._GetFilesWithExtInFolder(inputFolder, '.hdl')
         for hdlFilename in hdlFilenames:
             self.logger.Info("Copying %s to store" % (hdlFilename))
             fullInputFilename = join(inputFolder, hdlFilename)
             self.fileActions.CopyFile(fullInputFilename, join(hdlStoreFolder, hdlFilename))
 
-        hdlFilenames = self._GetFilesWithExtInFolder(hdlStoreFolder, 'hdl')
+        hdlFilenames = self._GetFilesWithExtInFolder(hdlStoreFolder, '.hdl')
         hdlChipList  = HdlChipList()
         for hdlFilename in hdlFilenames:
             self.logger.Info("Reading %s .." % (hdlFilename))
@@ -49,7 +49,7 @@ class Hdl2verilogMain():
         for hdlChip in hdlChipList.chipList:  
             self.mapper.CreateVerilogModule(hdlChip, hdlChipList, outputFolder)
 
-        tstFilenames = self._GetFilesWithExtInFolder(inputFolder, 'tst')
+        tstFilenames = self._GetFilesWithExtInFolder(inputFolder, '.tst')
         
         tstScripts = []
         tstsToRun  = []
@@ -75,7 +75,7 @@ class Hdl2verilogMain():
         runContents += "\n"
 
         verboseFlag = ""
-        verboseFlag = "-v -u -Wall"
+        #verboseFlag = "-v -u -Wall"
         for tstToRun in tstsToRun: # type: TstScript
             moduleList = hdlChipList.GetChipDependencyList(tstToRun.testChip)
             moduleList = [x + ".v" for x in moduleList]
