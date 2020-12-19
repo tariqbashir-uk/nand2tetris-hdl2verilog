@@ -15,7 +15,7 @@ Using this tool and a verilog compiler you will be able to: 
 - Convert the tst files that go with the HLD modules to verilog test bench files.
 - Use the provided cmp file to verify the testbench output (i.e. test that the converted verilog code works).
 
-The only caveat is that RAM4k and RAM16k will not compile and run due to their complexity.
+The only caveat is that RAM4k and RAM16k verilog and test bench files will be generated but won't compile and run in the simulator due to their complexity.
 
 ### Setting up tool (recommended tools)
 1. Ensure you have python3 installed on your machine
