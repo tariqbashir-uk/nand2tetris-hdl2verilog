@@ -25,9 +25,6 @@ class Hdl2verilogMain():
 
     ##########################################################################
     def Run(self, inputFolder, builtInChipFolder, outputFolder):
-        hdlStoreFolder = join(outputFolder, settings.HDL_STORE_FOLDER)
-        self.fileActions.CreateFolderIfNeeded(hdlStoreFolder)
-
         verilogModuleList = VerilogModuleList(builtInChipFolder)
         verilogFilenames = [join(builtInChipFolder, x) for x in self._GetFilesWithExtInFolder(builtInChipFolder, '.v')]
         for verilogFilename in verilogFilenames:
