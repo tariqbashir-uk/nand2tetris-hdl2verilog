@@ -43,6 +43,17 @@ class VerilogModuleList():
         return filenameList
 
     ##########################################################################
+    def CheckModulesInBuiltInList(self, moduleList):
+        missingBuiltInModuleList = []
+        for module in moduleList:
+            result = [x for x in self.builtInModuleList if module == x.moduleName]
+
+            if len(result) == 0:
+                missingBuiltInModuleList.append(module)
+
+        return missingBuiltInModuleList
+
+    ##########################################################################
     def WriteModules(self, outputFolder):
         verilogModGen = VerilogModuleGenerator(outputFolder)
 

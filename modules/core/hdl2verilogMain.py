@@ -44,18 +44,15 @@ class Hdl2verilogMain():
             hdlChip = hdlFile.ParseFile()
             hdlChipList.AddBuiltInChip(hdlChip)
 
-        # for hdlFilename in hdlFilenames:
-        #     self.logger.Info("Copying %s to store" % (hdlFilename))
-        #     fullInputFilename = join(inputFolder, hdlFilename)
-        #     self.fileActions.CopyFile(fullInputFilename, join(hdlStoreFolder, hdlFilename))
-
-        # hdlFilenames = self._GetFilesWithExtInFolder(hdlStoreFolder, '.hdl')
         hdlFilenames = [join(inputFolder, x) for x in self._GetFilesWithExtInFolder(inputFolder, '.hdl')]
         for hdlFilename in hdlFilenames:
             self.logger.Info("Reading %s .." % (hdlFilename))
             hdlFile = HdlFile(hdlFilename)
             hdlChip = hdlFile.ParseFile()
             hdlChipList.AddChip(hdlChip)
+
+        if not self.CheckChipDependencies(hdlChipList, verilogModuleList):
+            return
 
         hdlChipList.CheckAndAddClockInputs()
         hdlChipList.UpdateAllPinBitWidths()
@@ -101,8 +98,27 @@ class Hdl2verilogMain():
 
         runSHFile.WriteFile(runContents)
 
+        # Do this last
         verilogModuleList.WriteModules(outputFolder)
         return    
+
+    ##########################################################################
+    def CheckChipDependencies(self, hdlChipList, verilogModuleList):
+        passed = True
+        missingChipList, builtInChipsUsedList = hdlChipList.CheckChipDependencies()
+        
+        if len(missingChipList) > 0:
+            self.logger.Error("Missing chips detected! Following dependencies were not found in the input folder or built-in chip folder: %s" % (missingChipList))
+            passed = False
+
+        if len(builtInChipsUsedList) > 0:
+            missingBuiltInModuleList = verilogModuleList.CheckModulesInBuiltInList(builtInChipsUsedList)
+
+            if len(missingBuiltInModuleList) > 0:
+                self.logger.Error("Missing built-in verilog modules detected! Following expected built-in modules were not found in the built-in chip folder: %s" % (missingBuiltInModuleList))
+                passed = False
+
+        return passed
 
     ##########################################################################
     def _GetFilesWithExtInFolder(self, folder, ext):

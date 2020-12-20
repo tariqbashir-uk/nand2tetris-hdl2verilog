@@ -23,13 +23,6 @@ class HdlChipList():
         return
 
     ##########################################################################
-    def _GetChipsFromNameList(self, chipNameList):
-        chipList = []
-        for chipName in chipNameList:
-            chipList.append(self.GetChip(chipName))
-        return chipList
-
-    ##########################################################################
     def GetChip(self, chipName):
         result = None
         for hdlChip in self.chipList:
@@ -84,19 +77,6 @@ class HdlChipList():
         
         self.logger.Info("Completed: CheckAndAddClockInputs")
         return
-
-    ##########################################################################
-    def _GetClkPinInDependencies(self, hdlChip : HdlChip):
-        chipDependencyList = self.GetChipDependencyList(hdlChip)
-        chipList           = self._GetChipsFromNameList(chipDependencyList)
-
-        clkPin = None
-        for chip in chipList:
-            clkPin = chip.GetClkPin()
-            if clkPin:
-               break
-
-        return clkPin
 
     ##########################################################################
     def UpdateAllPartConnections(self):
@@ -160,3 +140,43 @@ class HdlChipList():
 
         moduleList.append(hdlChip.chipName)
         return moduleList
+
+    ##########################################################################
+    def CheckChipDependencies(self):
+        missingChipList      = []
+        builtInChipsUsedList = []
+
+        for chip in self.chipList:
+            dependencyList = self.GetChipDependencyList(chip)
+            for dependentChip in dependencyList:
+                chipFoundList        = [x.chipName for x in self.chipList if x.chipName == dependentChip]
+                builtInChipFoundList = [x.chipName for x in self.builtInChipList if x.chipName == dependentChip]
+
+                if len(chipFoundList) == 0 and len(builtInChipFoundList) == 0 and dependentChip not in missingChipList:
+                    missingChipList.append(dependentChip)
+
+                for chipName in builtInChipFoundList:
+                    if chipName not in builtInChipsUsedList:
+                        builtInChipsUsedList.append(chipName)
+
+        return missingChipList, builtInChipsUsedList
+
+    ##########################################################################
+    def _GetChipsFromNameList(self, chipNameList):
+        chipList = []
+        for chipName in chipNameList:
+            chipList.append(self.GetChip(chipName))
+        return chipList
+
+    ##########################################################################
+    def _GetClkPinInDependencies(self, hdlChip : HdlChip):
+        chipDependencyList = self.GetChipDependencyList(hdlChip)
+        chipList           = self._GetChipsFromNameList(chipDependencyList)
+
+        clkPin = None
+        for chip in chipList:
+            clkPin = chip.GetClkPin()
+            if clkPin:
+               break
+
+        return clkPin
