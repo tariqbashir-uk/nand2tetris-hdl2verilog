@@ -1,5 +1,6 @@
 import sys
 import os
+import stat
 import shutil
 import hashlib
 from shutil import copyfile
@@ -245,6 +246,14 @@ class FileActions:
         #print(filename1 + " = " + str(file1))
         #print(filename2 + " = " + str(file2))
         return file1 > file2 
+
+    ##########################################################################
+    # MakeExecutable
+    ##########################################################################
+    def MakeExecutable(self, filename):
+        st = os.stat(filename)
+        os.chmod(filename, st.st_mode | stat.S_IEXEC)
+        return
 
     ##########################################################################
     # Private: _md5
