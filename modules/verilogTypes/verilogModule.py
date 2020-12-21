@@ -10,7 +10,18 @@ class VerilogModule():
         self.outputPorts     = []
         self.submoduleCalls  = []
         self.wireAssignments = []
+
+        if self.moduleName:
+            self.SetModuleFilename(self.moduleName + ".v")
         return
+
+    ##########################################################################
+    def SetModuleName(self, moduleName):
+        self.moduleName = moduleName
+
+    ##########################################################################
+    def SetModuleFilename(self, moduleFilename):
+        self.moduleFilename = moduleFilename
 
     ##########################################################################
     def AddInputPorts(self, inputs):

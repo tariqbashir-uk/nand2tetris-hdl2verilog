@@ -1,0 +1,5 @@
+CHIP DFF {
+    IN in;
+    CLOCKED clk;
+    OUT out;
+}

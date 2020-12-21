@@ -1,6 +1,4 @@
 from modules.core.logger import Logger
-from modules.hdlTypes.hdlNandChip import HdlNandChip
-from modules.hdlTypes.hdlDFFChip import HdlDFFChip
 from modules.hdlTypes.hdlChip import HdlChip
 from modules.hdlTypes.hdlPin import HdlPin
 from modules.hdlTypes.hdlPinTypes import HdlPinTypes
@@ -11,6 +9,7 @@ class HdlChipList():
     def __init__(self):
         self.logger   = Logger()
         self.chipList = [] # type: list[HdlChip]
+        self.builtInChipList = [] # type: list[HdlChip]
         return
 
     ##########################################################################
@@ -19,11 +18,9 @@ class HdlChipList():
         return
 
     ##########################################################################
-    def _GetChipsFromNameList(self, chipNameList):
-        chipList = []
-        for chipName in chipNameList:
-            chipList.append(self.GetChip(chipName))
-        return chipList
+    def AddBuiltInChip(self, chip):
+        self.builtInChipList.append(chip)
+        return
 
     ##########################################################################
     def GetChip(self, chipName):
@@ -33,11 +30,11 @@ class HdlChipList():
                 result = hdlChip
                 break
 
-        if not result and chipName == 'Nand':
-            result = HdlNandChip.GetChip()
-
-        if not result and chipName == 'DFF':
-            result = HdlDFFChip.GetChip()
+        if not result:
+            for hdlChip in self.builtInChipList:
+                if hdlChip.chipName == chipName:
+                    result = hdlChip
+                    break
 
         return result
 
@@ -80,19 +77,6 @@ class HdlChipList():
         
         self.logger.Info("Completed: CheckAndAddClockInputs")
         return
-
-    ##########################################################################
-    def _GetClkPinInDependencies(self, hdlChip : HdlChip):
-        chipDependencyList = self.GetChipDependencyList(hdlChip)
-        chipList           = self._GetChipsFromNameList(chipDependencyList)
-
-        clkPin = None
-        for chip in chipList:
-            clkPin = chip.GetClkPin()
-            if clkPin:
-               break
-
-        return clkPin
 
     ##########################################################################
     def UpdateAllPartConnections(self):
@@ -156,3 +140,43 @@ class HdlChipList():
 
         moduleList.append(hdlChip.chipName)
         return moduleList
+
+    ##########################################################################
+    def CheckChipDependencies(self):
+        missingChipList      = []
+        builtInChipsUsedList = []
+
+        for chip in self.chipList:
+            dependencyList = self.GetChipDependencyList(chip)
+            for dependentChip in dependencyList:
+                chipFoundList        = [x.chipName for x in self.chipList if x.chipName == dependentChip]
+                builtInChipFoundList = [x.chipName for x in self.builtInChipList if x.chipName == dependentChip]
+
+                if len(chipFoundList) == 0 and len(builtInChipFoundList) == 0 and dependentChip not in missingChipList:
+                    missingChipList.append(dependentChip)
+
+                for chipName in builtInChipFoundList:
+                    if chipName not in builtInChipsUsedList:
+                        builtInChipsUsedList.append(chipName)
+
+        return missingChipList, builtInChipsUsedList
+
+    ##########################################################################
+    def _GetChipsFromNameList(self, chipNameList):
+        chipList = []
+        for chipName in chipNameList:
+            chipList.append(self.GetChip(chipName))
+        return chipList
+
+    ##########################################################################
+    def _GetClkPinInDependencies(self, hdlChip : HdlChip):
+        chipDependencyList = self.GetChipDependencyList(hdlChip)
+        chipList           = self._GetChipsFromNameList(chipDependencyList)
+
+        clkPin = None
+        for chip in chipList:
+            clkPin = chip.GetClkPin()
+            if clkPin:
+               break
+
+        return clkPin

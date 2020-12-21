@@ -7,7 +7,6 @@ import argparse
 import modules.settings as settings
 
 from modules.core.hdl2verilogMain import Hdl2verilogMain
-from modules.core.fileActions import FileActions
 from modules.core.logger import Logger
 
 baseFolder = os.path.dirname(os.path.realpath(__file__))
@@ -32,4 +31,4 @@ logger = Logger()
 logger.SetLogFolder(baseOutputFolder)
 
 hdl2verilogMain = Hdl2verilogMain()
-hdl2verilogMain.Run(args.inFolder, args.outFolder)
+hdl2verilogMain.Run(args.inFolder, join(baseFolder, settings.BUILTIN_CHIP_DIRECTORY_NAME), args.outFolder)

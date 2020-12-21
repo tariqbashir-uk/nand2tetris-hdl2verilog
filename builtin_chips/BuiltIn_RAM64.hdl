@@ -1,0 +1,5 @@
+CHIP RAM64 {
+    IN in[16], load, address[6];
+    CLOCKED clk;
+    OUT out[16];
+}

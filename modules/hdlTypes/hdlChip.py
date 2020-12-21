@@ -32,6 +32,19 @@ class HdlChip():
             self.inputPins.append(HdlPin(inputPin.pinName, 
                                          pinType=pinType, 
                                          bitWidthString=bitWidthString))
+
+        return
+
+    ##########################################################################
+    def AddClockedPins(self, inputs):
+        #self.logger.Debug("AddClockedPins: %d" % (len(inputs)))
+        for inputPin in inputs:
+            bitWidthString = None
+            if inputPin.bitWidthString:
+                bitWidthString = inputPin.bitWidthString            
+            self.inputPins.append(HdlPin(inputPin.pinName, 
+                                         pinType=HdlPinTypes.Clk, 
+                                         bitWidthString=bitWidthString))
         return
 
     ##########################################################################
