@@ -14,7 +14,7 @@ class IVerilogScriptGenerator():
 
     ##########################################################################
     def CreateScript(self, inputFolder, tstsToRun, hdlChipList, verilogModuleList):
-        runmeFilename = join(self.outputFolder, 'runme.sh')
+        runmeFilename = join(self.outputFolder, 'iverilog_compile_and_test.sh')
         runSHFile    = TextFile(runmeFilename)
         runContents  = "set -e\n"
         runContents += "\n"

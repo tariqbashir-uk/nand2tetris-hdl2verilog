@@ -28,7 +28,5 @@ if [[ ! -d ./out ]]; then
     mkdir out
 fi
 
-chmod +x ./runme.sh
-
 echo "############# Running generated tests #############"
-./runme.sh
+./iverilog_compile_and_test.sh
