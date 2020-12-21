@@ -86,7 +86,7 @@ class Hdl2verilogMain():
     ##########################################################################
     def CheckChipDependencies(self, hdlChipList, verilogModuleList):
         passed = True
-        missingChipList, builtInChipsUsedList = hdlChipList.CheckChipDependencies()
+        missingChipList, builtInChipsUsedList, noimplementationChipList = hdlChipList.CheckChipDependencies()
         
         if len(missingChipList) > 0:
             self.logger.Error("Missing chips detected! Following dependencies were not found in the input folder or built-in chip folder: %s" % (missingChipList))
@@ -98,5 +98,9 @@ class Hdl2verilogMain():
             if len(missingBuiltInModuleList) > 0:
                 self.logger.Error("Missing built-in verilog modules detected! Following expected built-in modules were not found in the built-in chip folder: %s" % (missingBuiltInModuleList))
                 passed = False
+
+        if len(noimplementationChipList) > 0:
+            self.logger.Error("Some HDL chips are missing implementation! Please check the following HDL chips run and pass tests using the nand2tetris HardwareSimulator : %s" % (noimplementationChipList))
+            passed = False
 
         return passed, builtInChipsUsedList

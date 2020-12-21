@@ -8,6 +8,7 @@ class HdlChip():
     def __init__(self):
         self.logger     = Logger()
         self.chipName   = None
+        self.filename   = None
         self.inputPins  = []  # type: list[HdlPin]
         self.outputPins = []  # type: list[HdlPin]
         self.partList   = []  # type: list[HdlChipPart]
@@ -16,6 +17,11 @@ class HdlChip():
     ##########################################################################
     def SetChipName(self, chipName):
         self.chipName = chipName
+        return
+
+    ##########################################################################
+    def SetChipFilename(self, filename):
+        self.filename = filename
         return
 
     ##########################################################################
