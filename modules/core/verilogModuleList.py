@@ -9,7 +9,6 @@ class VerilogModuleList():
         self.logger = Logger()
         self.moduleList = [] # type: list[VerilogModule]
         self.builtInModuleList = [] # type: list[VerilogModule]
-        self.usedBuiltInModules = []
         self.builtInChipFolder = builtInChipFolder
         return
 
@@ -36,7 +35,6 @@ class VerilogModuleList():
             elif len(moduleFromBuiltInList) > 0:
                 # Module must be taken from the builtin list
                 filenameList.append(moduleFromBuiltInList[0].moduleFilename)
-                self.usedBuiltInModules.append(moduleFromBuiltInList[0].moduleFilename)
             else:
                 self.logger.Error("Couldn't find module %s in the generated or built-in list" % (inputModule))
 
@@ -60,8 +58,16 @@ class VerilogModuleList():
         for module in self.moduleList:
             verilogModGen.CreateModule(module)
 
-        fileActions = FileActions()
-        for filename in self.usedBuiltInModules:
-            fileActions.CopyFile(join(self.builtInChipFolder, filename), 
-                                 join(outputFolder, filename))
         return
+
+    ##########################################################################
+    def CopyInternalModules(self, outputFolder, usedBuiltInModules):
+        fileActions = FileActions()
+
+        for moduleName in usedBuiltInModules: 
+            for verilogModule in self.builtInModuleList:
+                if verilogModule.moduleName == moduleName:        
+                    fileActions.CopyFile(join(self.builtInChipFolder, verilogModule.moduleFilename), 
+                                         join(outputFolder, verilogModule.moduleFilename))
+                    break
+        return        

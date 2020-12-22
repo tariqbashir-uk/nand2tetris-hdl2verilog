@@ -143,10 +143,14 @@ class HdlChipList():
 
     ##########################################################################
     def CheckChipDependencies(self):
-        missingChipList      = []
-        builtInChipsUsedList = []
+        missingChipList          = []
+        builtInChipsUsedList     = []
+        noimplementationChipList = []
 
         for chip in self.chipList:
+            if len(chip.partList) == 0:
+                noimplementationChipList.append(chip.filename)
+
             dependencyList = self.GetChipDependencyList(chip)
             for dependentChip in dependencyList:
                 chipFoundList        = [x.chipName for x in self.chipList if x.chipName == dependentChip]
@@ -159,7 +163,7 @@ class HdlChipList():
                     if chipName not in builtInChipsUsedList:
                         builtInChipsUsedList.append(chipName)
 
-        return missingChipList, builtInChipsUsedList
+        return missingChipList, builtInChipsUsedList, noimplementationChipList
 
     ##########################################################################
     def _GetChipsFromNameList(self, chipNameList):

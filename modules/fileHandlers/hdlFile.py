@@ -11,4 +11,6 @@ class HdlFile(TextFile):
     ##########################################################################
     def ParseFile(self):
         fileContents = self.ReadFile() 
-        return self.hdlParser.Parse(fileContents)
+        hdlChip = self.hdlParser.Parse(fileContents)
+        hdlChip.SetChipFilename(self.filename)
+        return hdlChip

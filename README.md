@@ -11,7 +11,7 @@ The result is the hdl2verliog tool, which I created to help me achieve this.
 ![Example: Intro](./assets/Intro.png?raw=true)
 
 Using this tool and a verilog compiler you will be able to: 
-- Convert all the HDL modules you created in exercise 01 to 03 to verilog modules.
+- Convert all the HDL modules you created in exercise 01 to 03 (will be expanded later) to verilog modules.
 - Convert the tst files that go with the HDL modules to verilog test bench files.
 - Use the provided cmp file to verify the testbench output (i.e. test that the converted verilog code works).
 
@@ -26,8 +26,7 @@ Using this tool and a verilog compiler you will be able to: 
 2. Run the tool on the project folder and provide an output folder:
 python3 ./hdl2verilog.py -i ~/nand2tetris/projects/01/ -o ./output/01
 
-After running the tool should have created the output folder and put all the generated modules and testbench files in it. It will also generate a script runme.sh which can be run to compile the modules and test benches using Icarus Verilog (which must be installed and in your path), run the test benches and then compare the generated out file with the cmp files in your input folder. The script will terminate on any Icarus compilation error or comparison error when the output is checked.
-Note: You might need to make runme.sh executable using the command: chmod +x runme.sh
+After running the tool should have created the output folder and put all the generated modules and testbench files in it. It will also generate a script iverilog_compile_and_test.sh which can be run to compile the modules and test benches using Icarus Verilog (which must be installed and in your path), run the test benches and then compare the generated out file with the cmp files in your input folder. The script will terminate on any Icarus compilation error or comparison error when the output is checked.
 You may use other Verilog compilers and simulators, but you would need to manually import the test bench and modules if you do this (I have tested with Modelsim).
 Every testbench that is run will produce a vcd file and this can be opened in a simulator like GTKWave to debug.
 
