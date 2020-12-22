@@ -11,7 +11,7 @@ The result is the hdl2verliog tool, which I created to help me achieve this.
 ![Example: Intro](./assets/Intro.png?raw=true)
 
 Using this tool and a verilog compiler you will be able to: 
-- Convert all the HDL modules you created in exercise 01 to 03 to verilog modules.
+- Convert all the HDL modules you created in exercise 01 to 03 (will be expanded later) to verilog modules.
 - Convert the tst files that go with the HDL modules to verilog test bench files.
 - Use the provided cmp file to verify the testbench output (i.e. test that the converted verilog code works).
 
