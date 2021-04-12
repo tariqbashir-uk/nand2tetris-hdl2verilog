@@ -17,7 +17,7 @@ Using this tool and a verilog compiler you will be able to: 
 
 ### Setting up tool (recommended tools)
 1. Ensure you have python3 installed on your machine
-2. Ensure you have python package ply installed: pip (or pip3) install ply
+2. Ensure you have the correct dependencies installed: pip install -r requirements.txt
 3. Install [Icarus Verilog](http://iverilog.icarus.com/)
 4. Install [GTKWave](http://gtkwave.sourceforge.net/)
 
